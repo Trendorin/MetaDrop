@@ -154,7 +154,11 @@ void clearXiphComment(TagLib::Ogg::XiphComment* tag) {
     if (tag == nullptr) {
         return;
     }
-    const auto keys = tag->fieldListMap().keys();
+    TagLib::StringList keys;
+    const auto fields = tag->fieldListMap();
+    for (auto it = fields.begin(); it != fields.end(); ++it) {
+        keys.append(it->first);
+    }
     for (const auto& key : keys) {
         tag->removeFields(key);
     }
@@ -206,7 +210,11 @@ bool sanitizeBySuffix(const QString& path, const QString& suffix) {
         if (!file.isValid() || file.tag() == nullptr) {
             return false;
         }
-        const auto keys = file.tag()->itemMap().keys();
+        TagLib::StringList keys;
+        const auto items = file.tag()->itemMap();
+        for (auto it = items.begin(); it != items.end(); ++it) {
+            keys.append(it->first);
+        }
         for (const auto& key : keys) {
             file.tag()->removeItem(key);
         }
@@ -218,7 +226,8 @@ bool sanitizeBySuffix(const QString& path, const QString& suffix) {
         if (!file.isValid()) {
             return false;
         }
-        return file.strip(TagLib::RIFF::WAV::File::AllTags);
+        file.strip(TagLib::RIFF::WAV::File::AllTags);
+        return true;
     }
 
     if (suffix == QStringLiteral("aiff") || suffix == QStringLiteral("aif")) {
