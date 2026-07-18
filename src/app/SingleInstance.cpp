@@ -51,7 +51,7 @@ void SingleInstance::acceptConnection() {
 
         const auto readMessage = [this, socket] {
             QDataStream stream(socket);
-            stream.setVersion(QDataStream::Qt_6_5);
+            stream.setVersion(QDataStream::Qt_6_0);
             stream.startTransaction();
             QStringList files;
             stream >> files;
@@ -86,7 +86,7 @@ bool SingleInstance::forwardToPrimary(const QString& name, const QStringList& fi
     }
 
     QDataStream stream(&socket);
-    stream.setVersion(QDataStream::Qt_6_5);
+    stream.setVersion(QDataStream::Qt_6_0);
     stream << files;
     socket.flush();
     const bool written = socket.waitForBytesWritten(1000);

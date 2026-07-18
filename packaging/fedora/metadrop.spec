@@ -13,9 +13,9 @@ BuildRequires:  pkgconfig(exiv2)
 BuildRequires:  pkgconfig(libarchive)
 BuildRequires:  pkgconfig(libqpdf)
 BuildRequires:  pkgconfig(taglib)
-BuildRequires:  qt6-qtbase-devel >= 6.5
-BuildRequires:  qt6-qtsvg-devel >= 6.5
-BuildRequires:  qt6-qttools-devel >= 6.5
+BuildRequires:  qt6-qtbase-devel >= 6.4
+BuildRequires:  qt6-qtsvg-devel >= 6.4
+BuildRequires:  qt6-qttools-devel >= 6.4
 
 %description
 MetaDrop reviews privacy-sensitive metadata and creates a verified sanitized

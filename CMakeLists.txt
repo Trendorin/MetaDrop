@@ -22,7 +22,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Concurrent Network Svg LinguistTools)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Widgets Concurrent Network Svg LinguistTools)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(EXIV2 REQUIRED IMPORTED_TARGET exiv2)
@@ -128,7 +128,7 @@ install(FILES resources/icons/io.github.trendorin.MetaDrop.svg
 )
 
 if(METADROP_BUILD_TESTS)
-    find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
+    find_package(Qt6 6.4 REQUIRED COMPONENTS Test)
     add_subdirectory(tests)
 endif()
 
