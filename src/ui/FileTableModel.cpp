@@ -11,7 +11,7 @@ namespace metadrop {
 FileTableModel::FileTableModel(QObject* parent) : QAbstractTableModel(parent) {}
 
 int FileTableModel::rowCount(const QModelIndex& parent) const {
-    return parent.isValid() ? 0 : records_.size();
+    return parent.isValid() ? 0 : static_cast<int>(records_.size());
 }
 
 int FileTableModel::columnCount(const QModelIndex& parent) const {
@@ -97,9 +97,11 @@ bool FileTableModel::addPath(const QString& path) {
     if (rowForPath(path) >= 0) {
         return false;
     }
-    const int row = records_.size();
+    const int row = static_cast<int>(records_.size());
     beginInsertRows({}, row, row);
-    records_.append({path});
+    FileRecord record;
+    record.path = path;
+    records_.append(record);
     endInsertRows();
     return true;
 }

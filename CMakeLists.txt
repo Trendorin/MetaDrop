@@ -62,6 +62,7 @@ add_library(metadrop_core STATIC
 )
 
 target_include_directories(metadrop_core PUBLIC src)
+target_compile_definitions(metadrop_core PRIVATE POINTERHOLDER_TRANSITION=0)
 target_link_libraries(metadrop_core
     PUBLIC
         Qt6::Core

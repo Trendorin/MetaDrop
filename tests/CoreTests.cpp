@@ -55,6 +55,19 @@ void CoreTests::createsNonDestructiveOutputNames() {
     firstOutput.close();
     const QString second = OutputPlanner::destinationFor(source, settings);
     QCOMPARE(QFileInfo(second).fileName(), QStringLiteral("photo.cleaned (2).jpg"));
+
+    const QString compoundSource = directory.filePath(QStringLiteral("archive.tar.gz"));
+    QFile compoundSourceFile(compoundSource);
+    QVERIFY(compoundSourceFile.open(QIODevice::WriteOnly));
+    compoundSourceFile.close();
+    const QString compoundFirst = OutputPlanner::destinationFor(compoundSource, settings);
+    QCOMPARE(QFileInfo(compoundFirst).fileName(), QStringLiteral("archive.cleaned.tar.gz"));
+    QFile compoundOutput(compoundFirst);
+    QVERIFY(compoundOutput.open(QIODevice::WriteOnly));
+    compoundOutput.close();
+    const QString compoundSecond = OutputPlanner::destinationFor(compoundSource, settings);
+    QCOMPARE(QFileInfo(compoundSecond).fileName(),
+             QStringLiteral("archive.cleaned (2).tar.gz"));
 }
 
 void CoreTests::validatesRegularFiles() {

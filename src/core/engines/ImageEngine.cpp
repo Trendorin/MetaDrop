@@ -40,10 +40,13 @@ void appendContainer(const Container& container,
                      QList<MetadataEntry>* entries) {
     for (const auto& datum : container) {
         QString value;
+        const long datumSize = datum.size();
+        const std::size_t rawSize =
+            datumSize > 0 ? static_cast<std::size_t>(datumSize) : 0U;
         try {
-            value = boundedUtf8(datum.toString(), datum.size());
+            value = boundedUtf8(datum.toString(), rawSize);
         } catch (const std::exception&) {
-            value = QStringLiteral("Binary value (%1 bytes)").arg(datum.size());
+            value = QStringLiteral("Binary value (%1 bytes)").arg(datumSize);
         }
 
         const QString key = QString::fromStdString(datum.key());

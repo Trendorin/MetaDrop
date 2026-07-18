@@ -31,10 +31,25 @@ QString OutputPlanner::uniquePath(const QString& desiredPath) {
     }
 
     const QFileInfo desired(desiredPath);
-    const QString suffix = desired.completeSuffix();
-    QString baseName = desired.fileName();
-    if (!suffix.isEmpty()) {
-        baseName.chop(suffix.size() + 1);
+    const QString fileName = desired.fileName();
+    const QString cleanedMarker = QStringLiteral(".cleaned");
+    const qsizetype markerPosition = fileName.lastIndexOf(cleanedMarker);
+
+    QString baseName;
+    QString suffix;
+    const qsizetype markerEnd = markerPosition + cleanedMarker.size();
+    if (markerPosition >= 0 &&
+        (markerEnd == fileName.size() || fileName.at(markerEnd) == QLatin1Char('.'))) {
+        baseName = fileName.left(markerEnd);
+        if (markerEnd < fileName.size()) {
+            suffix = fileName.mid(markerEnd + 1);
+        }
+    } else {
+        suffix = desired.completeSuffix();
+        baseName = fileName;
+        if (!suffix.isEmpty()) {
+            baseName.chop(suffix.size() + 1);
+        }
     }
 
     for (int index = 2; index < 10000; ++index) {
