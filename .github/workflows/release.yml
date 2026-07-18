@@ -13,29 +13,26 @@ permissions:
   id-token: write
   attestations: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  package:
-    name: Build release artifacts
+  prepare:
+    name: Resolve release version
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.ref_type == 'tag' ||
       startsWith(github.event.head_commit.message, 'release:')
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Check out source
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      - name: Install build and packaging dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
-            build-essential cmake ninja-build rpm \
-            qt6-base-dev qt6-svg-dev qt6-tools-dev \
-            libarchive-dev libexiv2-dev libqpdf-dev libtag1-dev
 
       - name: Resolve version
         id: version
@@ -59,28 +56,44 @@ jobs:
           fi
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
-      - name: Configure
-        run: >-
-          cmake -S . -B build -G Ninja
-          -DCMAKE_BUILD_TYPE=Release
-          -DMETADROP_BUILD_TESTS=ON
+  portable:
+    name: Build DEB and portable artifacts
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
 
-      - name: Build and test
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Ubuntu build dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential cmake ninja-build \
+            qt6-base-dev qt6-svg-dev qt6-tools-dev \
+            libarchive-dev libexiv2-dev libqpdf-dev libtag1-dev
+
+      - name: Configure, build and test
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMETADROP_BUILD_TESTS=ON
           cmake --build build --parallel 2
           ctest --test-dir build --output-on-failure
 
-      - name: Build native packages
+      - name: Build DEB and install tree
         run: |
           mkdir -p dist package-output
           cpack --config build/CPackConfig.cmake -G DEB -B package-output
-          cpack --config build/CPackConfig.cmake -G RPM -B package-output
           cpack --config build/CPackConfig.cmake -G TGZ -B package-output
-          cp package-output/*.deb package-output/*.rpm package-output/*.tar.gz dist/
+          cp package-output/*.deb package-output/*.tar.gz dist/
 
-      - name: Create source archive and checksums
+      - name: Create source, Arch and SPDX artifacts
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           git archive --format=tar.gz \
             --prefix="MetaDrop-${VERSION}/" \
@@ -89,20 +102,134 @@ jobs:
           sed -e "s/@VERSION@/${VERSION}/g" -e "s/@SOURCE_SHA256@/${source_hash}/g" \
             packaging/arch/PKGBUILD.in > dist/PKGBUILD
           packaging/scripts/generate-sbom.sh "$VERSION" > "dist/MetaDrop-${VERSION}.spdx"
+
+      - name: Upload portable artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: MetaDrop-portable-${{ needs.prepare.outputs.version }}
+          path: dist/*
+          if-no-files-found: error
+
+  rpm:
+    name: Build and install RPM on Fedora 44
+    needs: prepare
+    runs-on: ubuntu-24.04
+    container: fedora:44
+    timeout-minutes: 35
+
+    steps:
+      - name: Install Fedora build dependencies
+        run: |
+          dnf install --setopt=install_weak_deps=False -y \
+            cmake gcc-c++ git-core ninja-build pkgconf-pkg-config rpm-build \
+            qt6-qtbase-devel qt6-qtsvg-devel qt6-qttools-devel \
+            exiv2-devel taglib-devel qpdf-devel libarchive-devel
+
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Configure, build and test
+        run: |
+          cmake -S . -B build-rpm -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DMETADROP_BUILD_TESTS=ON
+          cmake --build build-rpm --parallel 2
+          ctest --test-dir build-rpm --output-on-failure
+
+      - name: Build Fedora RPM
+        run: |
+          mkdir -p dist package-output
+          cpack --config build-rpm/CPackConfig.cmake -G RPM -B package-output
+          cp package-output/*.rpm dist/
+
+      - name: Verify Fedora dependencies and installation
+        run: |
+          rpm_file="$(find dist -maxdepth 1 -type f -name '*.rpm' -print -quit)"
+          test -n "${rpm_file}"
+          rpm -qpR "${rpm_file}" | sort
+          if rpm -qpR "${rpm_file}" | grep -Eq 'libexiv2\.so\.27|libqpdf\.so\.29'; then
+            echo "RPM contains dependencies from the Ubuntu build environment" >&2
+            exit 1
+          fi
+          rpm -qpR "${rpm_file}" | grep -q 'libexiv2\.so\.28'
+          rpm -qpR "${rpm_file}" | grep -q 'libqpdf\.so\.30'
+          dnf install --setopt=install_weak_deps=False -y "${rpm_file}"
+          rpm -q metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-ldd.txt
+
+      - name: Upload Fedora RPM
+        uses: actions/upload-artifact@v7
+        with:
+          name: MetaDrop-rpm-${{ needs.prepare.outputs.version }}
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  publish:
+    name: Verify and publish release
+    needs: [prepare, portable, rpm]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download portable artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: MetaDrop-portable-${{ needs.prepare.outputs.version }}
+          path: dist
+
+      - name: Download Fedora RPM
+        uses: actions/download-artifact@v8
+        with:
+          name: MetaDrop-rpm-${{ needs.prepare.outputs.version }}
+          path: dist
+
+      - name: Verify artifact set and create checksums
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          shopt -s nullglob
+          deb=(dist/metadrop_"${VERSION}"_*.deb)
+          rpm=(dist/metadrop-"${VERSION}"-*.x86_64.rpm)
+          tree=(dist/MetaDrop-"${VERSION}"-x86_64.tar.gz)
+          source=(dist/MetaDrop-"${VERSION}"-source.tar.gz)
+          spdx=(dist/MetaDrop-"${VERSION}".spdx)
+          pkgbuild=(dist/PKGBUILD)
+          test "${#deb[@]}" -eq 1
+          test "${#rpm[@]}" -eq 1
+          test "${#tree[@]}" -eq 1
+          test "${#source[@]}" -eq 1
+          test "${#spdx[@]}" -eq 1
+          test "${#pkgbuild[@]}" -eq 1
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 6
+          if find dist -maxdepth 1 -type f -iname '*AppImage*' | grep -q .; then
+            echo "Unexpected AppImage artifact" >&2
+            exit 1
+          fi
           cd dist
           find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' \
             | sort --zero-terminated \
             | xargs --null --no-run-if-empty sha256sum > SHA256SUMS
+          sha256sum --check SHA256SUMS
 
       - name: Attest release artifacts
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: dist/*
 
-      - name: Upload workflow artifacts
+      - name: Upload verified release set
         uses: actions/upload-artifact@v7
         with:
-          name: MetaDrop-${{ steps.version.outputs.version }}
+          name: MetaDrop-${{ needs.prepare.outputs.version }}
           path: dist/*
           if-no-files-found: error
 
@@ -112,9 +239,9 @@ jobs:
           (github.ref_name == 'main' && startsWith(github.event.head_commit.message, 'release:'))
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', steps.version.outputs.version) }}
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', needs.prepare.outputs.version) }}
           target_commitish: ${{ github.sha }}
-          name: MetaDrop ${{ steps.version.outputs.version }}
+          name: MetaDrop ${{ needs.prepare.outputs.version }}
           body_path: RELEASE_NOTES.md
           generate_release_notes: false
           fail_on_unmatched_files: true

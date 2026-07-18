@@ -48,6 +48,45 @@ jobs:
           desktop-file-validate data/io.github.trendorin.MetaDrop.desktop
           appstreamcli validate --no-net data/io.github.trendorin.MetaDrop.metainfo.xml
 
+  fedora-rpm:
+    name: Fedora 44 RPM install test
+    runs-on: ubuntu-24.04
+    container: fedora:44
+    timeout-minutes: 30
+
+    steps:
+      - name: Install Fedora build dependencies
+        run: |
+          dnf install --setopt=install_weak_deps=False -y \
+            cmake gcc-c++ git-core ninja-build pkgconf-pkg-config rpm-build \
+            qt6-qtbase-devel qt6-qtsvg-devel qt6-qttools-devel \
+            exiv2-devel taglib-devel qpdf-devel libarchive-devel
+
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Configure, build and test
+        run: |
+          cmake -S . -B build-fedora -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_INSTALL_PREFIX=/usr \
+            -DMETADROP_BUILD_TESTS=ON
+          cmake --build build-fedora --parallel 2
+          ctest --test-dir build-fedora --output-on-failure
+
+      - name: Build and install RPM
+        run: |
+          mkdir -p package-output
+          cpack --config build-fedora/CPackConfig.cmake -G RPM -B package-output
+          rpm_file="$(find package-output -maxdepth 1 -type f -name '*.rpm' -print -quit)"
+          test -n "${rpm_file}"
+          rpm -qpR "${rpm_file}" | grep -q 'libexiv2\.so\.28'
+          rpm -qpR "${rpm_file}" | grep -q 'libqpdf\.so\.30'
+          dnf install --setopt=install_weak_deps=False -y "${rpm_file}"
+          rpm -q metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-ldd.txt
+
   sanitizers:
     name: ASan and UBSan
     runs-on: ubuntu-24.04
