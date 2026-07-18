@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
     MetaDrop
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "A native Linux metadata inspector and sanitizer"
     HOMEPAGE_URL "https://github.com/Trendorin/MetaDrop"
     LANGUAGES CXX
@@ -127,6 +127,16 @@ install(FILES packaging/io.github.trendorin.MetaDrop.metainfo.xml
 install(FILES resources/icons/io.github.trendorin.MetaDrop.svg
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
 )
+install(FILES
+    LICENSE
+    PRIVACY.md
+    SECURITY.md
+    THIRD_PARTY_NOTICES.md
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/metadrop
+)
+install(FILES packaging/debian/copyright
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/metadrop
+)
 
 if(METADROP_BUILD_TESTS)
     find_package(Qt6 6.4 REQUIRED COMPONENTS Test)
@@ -135,12 +145,13 @@ endif()
 
 set(CPACK_PACKAGE_NAME "MetaDrop")
 set(CPACK_PACKAGE_VENDOR "Trendorin")
-set(CPACK_PACKAGE_CONTACT "https://github.com/Trendorin/MetaDrop/issues")
+set(CPACK_PACKAGE_CONTACT "Trendorin <193045225+Trendorin@users.noreply.github.com>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Native Linux metadata inspector and sanitizer")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_FILE_NAME "MetaDrop-${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_GENERATOR "TGZ;DEB")
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6svg6 (>= 6.4)")
 set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
 include(CPack)

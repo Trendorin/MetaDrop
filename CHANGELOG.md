@@ -9,6 +9,19 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - Reproducible Flatpak packaging after the sandbox portal workflow is validated.
 - Additional fixture-driven format coverage without weakening verification.
 
+## [0.1.1] - 2026-07-18
+
+### Security
+
+- Replace the original PDF trailer `/ID` during a full rewrite and verify that the cleaned file received a different identifier.
+
+### Changed
+
+- Add an integration test covering PDF document information and identifier replacement.
+- Install project licensing, privacy, security, and third-party notices with binary packages.
+- Declare the Qt SVG runtime dependency explicitly for Debian packages.
+- Make release version resolution and artifact checksums deterministic.
+
 ## [0.1.0] - 2026-07-18
 
 ### Added
@@ -24,5 +37,6 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - English and Russian interface resources.
 - CI, sanitizer tests, AppImage and Debian release automation.
 
-[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Trendorin/MetaDrop/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Trendorin/MetaDrop/releases/tag/v0.1.0

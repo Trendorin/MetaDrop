@@ -32,6 +32,7 @@ MetaDrop treats every input file as untrusted.
 - Output paths must not exist and can never equal the source path.
 - Office containers have entry-count, metadata-part-size, expanded-size, path-traversal, and file-type checks.
 - A backend must reopen the staging file and report zero removable fields before the result is installed.
+- PDF output must contain a newly generated trailer identifier when the source had an `/ID` value.
 - The final rename occurs within the destination directory to keep it atomic on the same filesystem.
 - Metadata work runs off the UI thread; each operation uses independent backend objects.
 - CI builds with strict warnings and runs AddressSanitizer plus UndefinedBehaviorSanitizer.

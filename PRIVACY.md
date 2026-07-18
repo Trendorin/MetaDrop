@@ -17,6 +17,8 @@ Cleaning uses a randomly named staging file in the destination directory. The st
 
 The source file is never overwritten in version 0.1.x. Cleaned copies default to owner-only permissions. Preserving source file-system timestamps is optional and disabled by default.
 
+PDF rewriting removes the source trailer file identifier. qpdf assigns a fresh identifier to the cleaned copy so it cannot be correlated through the original `/ID` value.
+
 ## What metadata cleaning cannot hide
 
 MetaDrop does not promise anonymity. Personal information can remain in visible pixels, audio, document text, comments, tracked revisions, hidden content, attachments, filenames, surrounding directory names, file-system records, backups, cloud-provider history, or the account used to share a file.
