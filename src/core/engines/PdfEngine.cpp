@@ -93,7 +93,8 @@ InspectionReport PdfEngine::inspect(const QString& path) const {
 
     try {
         QPDF pdf;
-        pdf.processFile(QFile::encodeName(path).constData());
+        const QByteArray encodedPath = QFile::encodeName(path);
+        pdf.processFile(encodedPath.constData());
 
         QPDFObjectHandle trailer = pdf.getTrailer();
         if (trailer.hasKey("/Info")) {
@@ -156,7 +157,8 @@ bool PdfEngine::sanitize(const QString& sourcePath,
     Q_UNUSED(warnings)
     try {
         QPDF pdf;
-        pdf.processFile(QFile::encodeName(sourcePath).constData());
+        const QByteArray sourceName = QFile::encodeName(sourcePath);
+        pdf.processFile(sourceName.constData());
 
         QPDFObjectHandle trailer = pdf.getTrailer();
         const std::string originalIdentifier = rawFileIdentifier(trailer);
@@ -169,8 +171,9 @@ bool PdfEngine::sanitize(const QString& sourcePath,
         root.removeKey("/SpiderInfo");
         removePageMetadata(pdf);
 
+        const QByteArray outputName = QFile::encodeName(outputPath);
         {
-            QPDFWriter writer(pdf, QFile::encodeName(outputPath).constData());
+            QPDFWriter writer(pdf, outputName.constData());
             writer.setObjectStreamMode(qpdf_o_generate);
             writer.setCompressStreams(true);
             writer.write();
@@ -178,7 +181,7 @@ bool PdfEngine::sanitize(const QString& sourcePath,
 
         if (!originalIdentifier.empty()) {
             QPDF verification;
-            verification.processFile(QFile::encodeName(outputPath).constData());
+            verification.processFile(outputName.constData());
             const std::string replacementIdentifier =
                 rawFileIdentifier(verification.getTrailer());
             if (replacementIdentifier.empty() || replacementIdentifier == originalIdentifier) {
