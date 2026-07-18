@@ -2,45 +2,26 @@
 
 ## Supported versions
 
-| Version | Security fixes |
-|---|---|
+| Version | Security updates |
+|---|:---:|
 | 0.1.x | Yes |
-| Development snapshots | Best effort |
+| Older / unreleased snapshots | No |
 
 ## Report a vulnerability
 
-Do not open a public issue for a vulnerability that could expose files, execute code, bypass verification, follow an unintended path, or produce a false “clean” result.
+Use [GitHub private vulnerability reporting](https://github.com/Trendorin/MetaDrop/security/advisories/new). Do not open a public issue for a suspected vulnerability before a fix is available.
 
-Use [GitHub private vulnerability reporting](https://github.com/Trendorin/MetaDrop/security/advisories/new). Include:
+Include:
 
-- affected version and Linux distribution;
-- file family and backend involved;
-- minimal reproduction steps;
-- expected and observed result;
-- sanitizer trace or debugger output when available;
-- a synthetic proof-of-concept file with no personal or confidential data.
+- affected MetaDrop version and Linux distribution;
+- file family and metadata backend involved;
+- minimal reproduction steps and expected/observed behavior;
+- whether verification was bypassed or an unintended path was read or changed;
+- logs with usernames, paths, tokens and unrelated personal data removed;
+- a synthetic proof-of-concept file containing no confidential data.
 
-The project aims to acknowledge a complete report within 72 hours. A fix, coordinated disclosure date, and credit are agreed with the reporter based on severity and complexity.
+The target response time is 72 hours for acknowledgement and 14 days for an initial assessment. Complex fixes or coordinated disclosure can take longer. Credit is given with the reporter's consent.
 
-## Security model
+High-priority reports include parser-driven code execution, path traversal, symlink following, source overwrite, output installed without verification, unsafe archive expansion and release-workflow compromise.
 
-MetaDrop treats every input file as untrusted.
-
-- Only regular files are accepted; symbolic links are refused.
-- The source path is revalidated immediately before cleaning.
-- Cleaning happens in a randomly named owner-only staging file.
-- Output paths must not exist and can never equal the source path.
-- Office containers have entry-count, metadata-part-size, expanded-size, path-traversal, and file-type checks.
-- A backend must reopen the staging file and report zero removable fields before the result is installed.
-- PDF output must contain a newly generated trailer identifier when the source had an `/ID` value.
-- The final rename occurs within the destination directory to keep it atomic on the same filesystem.
-- Metadata work runs off the UI thread; each operation uses independent backend objects.
-- CI builds with strict warnings and runs AddressSanitizer plus UndefinedBehaviorSanitizer.
-
-MetaDrop depends on mature parsers, but native media parsers can still contain vulnerabilities. Keep Exiv2, TagLib, qpdf, libarchive, Qt, and MetaDrop updated. For hostile samples, use a sandboxed disposable user session or virtual machine.
-
-## Verification boundary
-
-“Verified” means that the same format backend reopened the generated file and found none of the fields that backend marks removable. It is not a mathematical proof that arbitrary bytes contain no identifying information.
-
-The exact per-format boundary is documented in the README. Visible content, filename and filesystem records, PDF annotations/forms/attachments, office comments/revisions/hidden content, and MP4 timed metadata tracks are outside version 0.1.x cleaning scope.
+The complete trust boundary is documented in the [security model](docs/SECURITY_MODEL.md).

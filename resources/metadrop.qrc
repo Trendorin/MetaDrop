@@ -1,5 +1,5 @@
 <RCC>
   <qresource prefix="/icons">
-    <file alias="metadrop.png">icons/io.github.trendorin.MetaDrop.png</file>
+    <file alias="metadrop.png">../data/icons/hicolor/512x512/apps/io.github.trendorin.MetaDrop.png</file>
   </qresource>
 </RCC>

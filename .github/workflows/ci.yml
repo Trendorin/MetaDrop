@@ -45,8 +45,8 @@ jobs:
 
       - name: Validate desktop metadata
         run: |
-          desktop-file-validate packaging/io.github.trendorin.MetaDrop.desktop
-          appstreamcli validate --no-net packaging/io.github.trendorin.MetaDrop.metainfo.xml
+          desktop-file-validate data/io.github.trendorin.MetaDrop.desktop
+          appstreamcli validate --no-net data/io.github.trendorin.MetaDrop.metainfo.xml
 
   sanitizers:
     name: ASan and UBSan

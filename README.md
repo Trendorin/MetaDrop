@@ -1,6 +1,9 @@
 <p align="center">
-  <img src="docs/assets/hero.svg" width="100%" alt="MetaDrop — inspect, sanitize and verify file metadata">
+  <img src="data/icons/hicolor/512x512/apps/io.github.trendorin.MetaDrop.png" width="144" alt="MetaDrop application icon">
 </p>
+
+<h1 align="center">MetaDrop</h1>
+<p align="center">Inspect, sanitize and verify file metadata locally.</p>
 
 <p align="center">
   <a href="README.md"><img alt="English" src="https://img.shields.io/badge/EN-English-d7dade?style=flat-square&labelColor=15181b"></a>
@@ -21,7 +24,7 @@
   <a href="#install">Install</a> ·
   <a href="#build-from-source">Source</a> ·
   <a href="#uninstall">Uninstall</a> ·
-  <a href="SECURITY.md">Security</a> ·
+  <a href="docs/SECURITY_MODEL.md">Security</a> ·
   <a href="https://github.com/Trendorin/MetaDrop/releases">Releases</a>
 </p>
 
@@ -54,9 +57,8 @@ Download the matching asset and `SHA256SUMS` from the [latest release](https://g
 
 | System | Asset | Command |
 |---|---|---|
-| Any supported x86-64 Linux | `MetaDrop-*-x86_64.AppImage` | `chmod +x MetaDrop-*.AppImage && ./MetaDrop-*.AppImage` |
-| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Fedora / RHEL | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
+| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Arch family | `PKGBUILD` | `makepkg -si` |
 
 Verify downloaded files before installation:
@@ -104,9 +106,8 @@ cmake --install build/release --prefix "$HOME/.local"
 
 | Installation | Command |
 |---|---|
-| AppImage | Delete the downloaded `MetaDrop-*-x86_64.AppImage` file |
-| Debian / Ubuntu | `sudo apt remove metadrop` |
 | Fedora / RHEL | `sudo dnf remove metadrop` |
+| Debian / Ubuntu | `sudo apt remove metadrop` |
 | Arch family | `sudo pacman -Rns metadrop` |
 | Source build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |
 
@@ -119,10 +120,10 @@ Optional: remove local preferences with `rm -f "$HOME/.config/Trendorin/MetaDrop
 - Staging files are owner-only, archive expansion is bounded, and final placement is atomic.
 - Metadata removal reduces accidental disclosure but does not anonymize visible content, filenames, filesystem records or the account used to share a file.
 
-Read the [security model](SECURITY.md), [data-handling policy](PRIVACY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+Read the [security model](docs/SECURITY_MODEL.md), [data-handling policy](docs/PRIVACY.md), [vulnerability policy](SECURITY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Project
 
-[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Contributors](CONTRIBUTORS.md) · [Issue tracker](https://github.com/Trendorin/MetaDrop/issues)
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Contributors](CONTRIBUTORS.md) · [Support](SUPPORT.md)
 
 Maintained by [Trendorin](https://github.com/Trendorin). Licensed under [GPL-3.0-or-later](LICENSE).

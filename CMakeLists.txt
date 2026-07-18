@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
     MetaDrop
-    VERSION 0.1.2
+    VERSION 0.1.3
     DESCRIPTION "A native Linux metadata inspector and sanitizer"
     HOMEPAGE_URL "https://github.com/Trendorin/MetaDrop"
     LANGUAGES CXX
@@ -118,13 +118,13 @@ install(TARGETS metadrop
     BUNDLE DESTINATION .
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-install(FILES packaging/io.github.trendorin.MetaDrop.desktop
+install(FILES data/io.github.trendorin.MetaDrop.desktop
     DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )
-install(FILES packaging/io.github.trendorin.MetaDrop.metainfo.xml
+install(FILES data/io.github.trendorin.MetaDrop.metainfo.xml
     DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
 )
-install(FILES resources/icons/io.github.trendorin.MetaDrop.png
+install(FILES data/icons/hicolor/512x512/apps/io.github.trendorin.MetaDrop.png
     DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/512x512/apps
 )
 install(FILES
@@ -133,10 +133,15 @@ install(FILES
     README.uk.md
     README.de.md
     CHANGELOG.md
+    CONTRIBUTING.md
+    CONTRIBUTORS.md
+    RELEASE_NOTES.md
     LICENSE
-    PRIVACY.md
     SECURITY.md
+    SUPPORT.md
     THIRD_PARTY_NOTICES.md
+    docs/PRIVACY.md
+    docs/SECURITY_MODEL.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/metadrop
 )
 install(FILES packaging/debian/copyright

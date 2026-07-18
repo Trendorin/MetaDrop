@@ -19,7 +19,7 @@ body:
     attributes:
       label: Linux system
       description: Distribution, desktop, display server, and installation method.
-      placeholder: Fedora 44, KDE Plasma, Wayland, AppImage
+      placeholder: Fedora 44, KDE Plasma, Wayland, RPM
     validations:
       required: true
   - type: dropdown

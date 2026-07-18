@@ -1,6 +1,9 @@
 <p align="center">
-  <img src="docs/assets/hero.svg" width="100%" alt="MetaDrop — Metadaten prüfen, bereinigen und verifizieren">
+  <img src="data/icons/hicolor/512x512/apps/io.github.trendorin.MetaDrop.png" width="144" alt="MetaDrop-Anwendungssymbol">
 </p>
+
+<h1 align="center">MetaDrop</h1>
+<p align="center">Dateimetadaten lokal prüfen, bereinigen und verifizieren.</p>
 
 <p align="center">
   <a href="README.md"><img alt="English" src="https://img.shields.io/badge/EN-English-d7dade?style=flat-square&labelColor=15181b"></a>
@@ -19,7 +22,7 @@
 
 <p align="center">
   <a href="#install">Installation</a> · <a href="#build-from-source">Quellcode</a> ·
-  <a href="#uninstall">Deinstallation</a> · <a href="SECURITY.md">Sicherheit</a> ·
+  <a href="#uninstall">Deinstallation</a> · <a href="docs/SECURITY_MODEL.md">Sicherheit</a> ·
   <a href="https://github.com/Trendorin/MetaDrop/releases">Releases</a>
 </p>
 
@@ -52,9 +55,8 @@ Lade die passende Datei und `SHA256SUMS` aus dem [aktuellen Release](https://git
 
 | System | Datei | Befehl |
 |---|---|---|
-| Unterstütztes Linux x86-64 | `MetaDrop-*-x86_64.AppImage` | `chmod +x MetaDrop-*.AppImage && ./MetaDrop-*.AppImage` |
-| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Fedora / RHEL | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
+| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Arch-basiert | `PKGBUILD` | `makepkg -si` |
 
 ```bash
@@ -98,9 +100,8 @@ cmake --install build/release --prefix "$HOME/.local"
 
 | Installationsart | Befehl |
 |---|---|
-| AppImage | Die heruntergeladene Datei `MetaDrop-*-x86_64.AppImage` löschen |
-| Debian / Ubuntu | `sudo apt remove metadrop` |
 | Fedora / RHEL | `sudo dnf remove metadrop` |
+| Debian / Ubuntu | `sudo apt remove metadrop` |
 | Arch-basiert | `sudo pacman -Rns metadrop` |
 | Quellcode-Build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |
 
@@ -113,10 +114,10 @@ Lokale Einstellungen lassen sich mit `rm -f "$HOME/.config/Trendorin/MetaDrop.co
 - Temporäre Dateien sind nur für den Besitzer zugänglich, die Archiventpackung ist begrenzt und die endgültige Ablage erfolgt atomar.
 - Das Entfernen von Metadaten reduziert unbeabsichtigte Offenlegung, anonymisiert aber keine sichtbaren Inhalte, Dateinamen, Dateisystemeinträge oder Freigabekonten.
 
-Siehe [Sicherheitsmodell](SECURITY.md), [Datenrichtlinie](PRIVACY.md) und [Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md).
+Siehe [Sicherheitsmodell](docs/SECURITY_MODEL.md), [Datenrichtlinie](docs/PRIVACY.md), [Schwachstellenrichtlinie](SECURITY.md) und [Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md).
 
 ## Projekt
 
-[Änderungen](CHANGELOG.md) · [Mitwirken](CONTRIBUTING.md) · [Mitwirkende](CONTRIBUTORS.md) · [Issue-Tracker](https://github.com/Trendorin/MetaDrop/issues)
+[Änderungen](CHANGELOG.md) · [Mitwirken](CONTRIBUTING.md) · [Mitwirkende](CONTRIBUTORS.md) · [Support](SUPPORT.md)
 
 Betreut von [Trendorin](https://github.com/Trendorin). Lizenz: [GPL-3.0-or-later](LICENSE).

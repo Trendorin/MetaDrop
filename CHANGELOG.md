@@ -9,6 +9,16 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - Reproducible Flatpak packaging after the sandbox portal workflow is validated.
 - Additional fixture-driven format coverage without weakening verification.
 
+## [0.1.3] - 2026-07-19
+
+### Changed
+
+- Replaced the wide README banner with the centered application icon across EN, RU, UK and DE documentation.
+- Aligned the documentation layout with Vacuo and removed the unused code-of-conduct file.
+- Standardized release output as DEB, RPM, TGZ, Arch `PKGBUILD`, source, SPDX SBOM and `SHA256SUMS`.
+- Removed AppImage from new releases so both projects publish the same supported artifact set.
+- Added a dedicated security model, support page and CodeQL workflow.
+
 ## [0.1.2] - 2026-07-19
 
 ### Changed
@@ -47,7 +57,8 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - English and Russian interface resources.
 - CI, sanitizer tests, AppImage and Debian release automation.
 
-[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/Trendorin/MetaDrop/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Trendorin/MetaDrop/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Trendorin/MetaDrop/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Trendorin/MetaDrop/releases/tag/v0.1.0

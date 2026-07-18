@@ -50,4 +50,4 @@ If a backend cannot verify a format, report it as unsupported. Do not trade a re
 - [ ] English UI text is clear; Russian translation is updated when applicable.
 - [ ] `ctest --preset asan` passes.
 
-By contributing, you agree that your work is licensed under GPL-3.0-or-later and that project participation follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+By contributing, you agree that your work is licensed under GPL-3.0-or-later and follows the review and security requirements documented in this repository.

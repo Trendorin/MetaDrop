@@ -10,4 +10,4 @@ Additional contributors are represented by the repository's signed commit and pu
 
 MetaDrop builds on the work of the Qt, Exiv2, TagLib, qpdf, and libarchive communities. Each dependency remains under its own license. Release artifacts include the notices required by bundled dependencies.
 
-Artwork in `resources/icons` and `docs/assets` is part of MetaDrop and distributed under the project license.
+The application icon in `data/icons` is part of MetaDrop and distributed under the project license.
