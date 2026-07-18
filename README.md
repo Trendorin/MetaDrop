@@ -57,9 +57,11 @@ Download the matching asset and `SHA256SUMS` from the [latest release](https://g
 
 | System | Asset | Command |
 |---|---|---|
-| Fedora / RHEL | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
+| Fedora 44 | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
 | Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Arch family | `PKGBUILD` | `makepkg -si` |
+
+The RPM is built and dependency-tested on Fedora 44. It is not advertised as a RHEL package.
 
 Verify downloaded files before installation:
 
@@ -106,7 +108,7 @@ cmake --install build/release --prefix "$HOME/.local"
 
 | Installation | Command |
 |---|---|
-| Fedora / RHEL | `sudo dnf remove metadrop` |
+| Fedora 44 | `sudo dnf remove metadrop` |
 | Debian / Ubuntu | `sudo apt remove metadrop` |
 | Arch family | `sudo pacman -Rns metadrop` |
 | Source build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |

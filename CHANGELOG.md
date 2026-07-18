@@ -9,6 +9,18 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - Reproducible Flatpak packaging after the sandbox portal workflow is validated.
 - Additional fixture-driven format coverage without weakening verification.
 
+## [0.1.4] - 2026-07-19
+
+### Fixed
+
+- Build the RPM inside Fedora 44 so it links against Fedora's `libexiv2.so.28` and `libqpdf.so.30` instead of Ubuntu library versions.
+- Install the generated RPM through DNF and check all dynamic-library links before a release can be published.
+
+### Changed
+
+- Split DEB and RPM packaging into distribution-native release jobs.
+- Document the binary RPM as a Fedora 44 package instead of claiming unverified RHEL compatibility.
+
 ## [0.1.3] - 2026-07-19
 
 ### Changed
@@ -57,7 +69,8 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - English and Russian interface resources.
 - CI, sanitizer tests, AppImage and Debian release automation.
 
-[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/Trendorin/MetaDrop/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Trendorin/MetaDrop/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Trendorin/MetaDrop/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Trendorin/MetaDrop/compare/v0.1.0...v0.1.1

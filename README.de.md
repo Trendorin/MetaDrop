@@ -55,9 +55,11 @@ Lade die passende Datei und `SHA256SUMS` aus dem [aktuellen Release](https://git
 
 | System | Datei | Befehl |
 |---|---|---|
-| Fedora / RHEL | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
+| Fedora 44 | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
 | Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
 | Arch-basiert | `PKGBUILD` | `makepkg -si` |
+
+Das RPM wird unter Fedora 44 gebaut und per Installation geprüft. Es wird nicht als RHEL-Paket angeboten.
 
 ```bash
 sha256sum --ignore-missing --check SHA256SUMS
@@ -100,7 +102,7 @@ cmake --install build/release --prefix "$HOME/.local"
 
 | Installationsart | Befehl |
 |---|---|
-| Fedora / RHEL | `sudo dnf remove metadrop` |
+| Fedora 44 | `sudo dnf remove metadrop` |
 | Debian / Ubuntu | `sudo apt remove metadrop` |
 | Arch-basiert | `sudo pacman -Rns metadrop` |
 | Quellcode-Build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |

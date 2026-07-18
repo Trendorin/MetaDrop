@@ -1,31 +1,29 @@
-# MetaDrop 0.1.3
+# MetaDrop 0.1.4
 
-MetaDrop 0.1.3 aligns the repository and release layout with Vacuo. The README now uses only the centered application icon, documentation follows the same EN/RU/UK/DE structure, and native package artifacts use one consistent release set. Metadata engines and verification behavior are unchanged.
+MetaDrop 0.1.4 corrects Fedora packaging. Application behavior and the verified metadata-cleaning boundary are unchanged.
 
 ## Included
 
 | Asset | Purpose |
 |---|---|
-| `metadrop_0.1.3_amd64.deb` | Debian / Ubuntu package |
-| `metadrop-0.1.3-1.x86_64.rpm` | Fedora / RHEL package |
+| `metadrop_0.1.4_amd64.deb` | Debian / Ubuntu package |
+| `metadrop-0.1.4-1.x86_64.rpm` | Fedora 44 package |
 | `PKGBUILD` | Arch-family package recipe |
-| `MetaDrop-0.1.3-x86_64.tar.gz` | Installable Linux tree |
-| `MetaDrop-0.1.3-source.tar.gz` | Release source |
-| `MetaDrop-0.1.3.spdx` | SPDX 2.3 software bill of materials |
+| `MetaDrop-0.1.4-x86_64.tar.gz` | Installable Linux tree |
+| `MetaDrop-0.1.4-source.tar.gz` | Release source |
+| `MetaDrop-0.1.4.spdx` | SPDX 2.3 software bill of materials |
 | `SHA256SUMS` | Integrity manifest for every asset |
 
-## Changes
+## Fixed
 
-- Removed the wide README banner; the application icon is now centered without a surrounding hero background.
-- Standardized project documentation and removed the unused code-of-conduct file.
-- Standardized release assets with Vacuo and removed AppImage from new releases.
-- Added a dedicated privacy document, security model, support page and CodeQL workflow.
+- The RPM is now compiled inside Fedora 44 and links against Fedora-provided `libexiv2.so.28` and `libqpdf.so.30`.
+- The release workflow installs the finished RPM through DNF and checks every dynamic-library link before publication.
+- Debian/Ubuntu and Fedora packages are built in separate native environments.
 
-## Privacy boundary
+The incompatible 0.1.3 RPM should not be used on Fedora. Download the 0.1.4 RPM and install it with:
 
-- Source files are never overwritten; MetaDrop creates and verifies a separate copy.
-- Unsupported formats are never reported as clean.
-- Visible content, filenames, filesystem records, comments, tracked changes, hidden sheets/slides and macros remain outside the verified metadata scope.
-- Processing stays local; the application contains no telemetry or upload client.
+```bash
+sudo dnf install ./metadrop-0.1.4-1.x86_64.rpm
+```
 
 Verify downloads with `sha256sum --ignore-missing --check SHA256SUMS`.
