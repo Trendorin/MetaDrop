@@ -23,6 +23,17 @@ QString boundedUtf8(const std::string& value, const std::size_t rawSize) {
     return text;
 }
 
+std::size_t iccProfileSize(Exiv2::Image& image) {
+#if EXIV2_TEST_VERSION(0, 28, 0)
+    return image.iccProfile().size();
+#else
+    const auto* profile = image.iccProfile();
+    return profile != nullptr && profile->size_ > 0
+               ? static_cast<std::size_t>(profile->size_)
+               : 0U;
+#endif
+}
+
 template <typename Container>
 void appendContainer(const Container& container,
                      const QString& group,
@@ -104,7 +115,7 @@ InspectionReport ImageEngine::inspect(const QString& path) const {
 
     try {
         auto image = Exiv2::ImageFactory::open(path.toStdString());
-        if (!image) {
+        if (image.get() == nullptr) {
             report.error = QStringLiteral("Exiv2 did not recognize this image");
             return report;
         }
@@ -125,7 +136,7 @@ InspectionReport ImageEngine::inspect(const QString& path) const {
         if (image->iccProfileDefined()) {
             report.entries.append(
                 {QStringLiteral("Image"), QStringLiteral("ICC color profile"),
-                 QStringLiteral("%1 bytes").arg(image->iccProfile().size()),
+                 QStringLiteral("%1 bytes").arg(iccProfileSize(*image)),
                  QStringLiteral("A color profile affects rendering and is preserved by default"),
                  RiskLevel::Low, false, true});
         }
@@ -163,7 +174,7 @@ bool ImageEngine::sanitize(const QString& sourcePath,
 
     try {
         auto image = Exiv2::ImageFactory::open(outputPath.toStdString());
-        if (!image) {
+        if (image.get() == nullptr) {
             if (error != nullptr) {
                 *error = QStringLiteral("The copied image could not be reopened");
             }

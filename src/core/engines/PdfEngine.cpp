@@ -15,7 +15,7 @@
 namespace metadrop {
 namespace {
 
-QString pdfValue(const QPDFObjectHandle& object) {
+QString pdfValue(QPDFObjectHandle object) {
     try {
         const std::string raw = object.isString() ? object.getUTF8Value() : object.unparse();
         constexpr qsizetype MaximumCharacters = 4096;
@@ -29,7 +29,7 @@ QString pdfValue(const QPDFObjectHandle& object) {
     }
 }
 
-void inspectDictionary(const QPDFObjectHandle& dictionary,
+void inspectDictionary(QPDFObjectHandle dictionary,
                        const QString& group,
                        QList<MetadataEntry>* entries) {
     if (!dictionary.isDictionary()) {
@@ -53,7 +53,7 @@ void appendPresence(const QString& key,
 }
 
 void removePageMetadata(QPDF& pdf) {
-    for (auto& page : pdf.getAllPages()) {
+    for (auto page : pdf.getAllPages()) {
         page.removeKey("/Metadata");
         page.removeKey("/PieceInfo");
     }
@@ -88,13 +88,13 @@ InspectionReport PdfEngine::inspect(const QString& path) const {
         QPDF pdf;
         pdf.processFile(QFile::encodeName(path).constData());
 
-        const QPDFObjectHandle trailer = pdf.getTrailer();
+        QPDFObjectHandle trailer = pdf.getTrailer();
         if (trailer.hasKey("/Info")) {
             inspectDictionary(trailer.getKey("/Info"), QStringLiteral("PDF document info"),
                               &report.entries);
         }
 
-        const QPDFObjectHandle root = pdf.getRoot();
+        QPDFObjectHandle root = pdf.getRoot();
         if (root.hasKey("/Metadata")) {
             appendPresence(QStringLiteral("XMP metadata stream"),
                            QStringLiteral("Embedded XML metadata stream"), &report.entries);
@@ -110,7 +110,7 @@ InspectionReport PdfEngine::inspect(const QString& path) const {
         }
 
         int pageMetadataStreams = 0;
-        for (const auto& page : pdf.getAllPages()) {
+        for (auto page : pdf.getAllPages()) {
             if (page.hasKey("/Metadata") || page.hasKey("/PieceInfo")) {
                 ++pageMetadataStreams;
             }
