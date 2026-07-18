@@ -1,76 +1,96 @@
 <p align="center">
-  <img src="docs/assets/hero.svg" alt="MetaDrop — native metadata privacy for Linux" width="100%">
+  <img src="docs/assets/hero.svg" width="100%" alt="MetaDrop — inspect, sanitize and verify file metadata">
 </p>
 
 <p align="center">
-  <a href="README.md"><strong>English</strong></a> · <a href="README.ru.md">Русский</a>
+  <a href="README.md"><img alt="English" src="https://img.shields.io/badge/EN-English-d7dade?style=flat-square&labelColor=15181b"></a>
+  <a href="README.ru.md"><img alt="Русский" src="https://img.shields.io/badge/RU-Русский-d7dade?style=flat-square&labelColor=15181b"></a>
+  <a href="README.uk.md"><img alt="Українська" src="https://img.shields.io/badge/UK-Українська-d7dade?style=flat-square&labelColor=15181b"></a>
+  <a href="README.de.md"><img alt="Deutsch" src="https://img.shields.io/badge/DE-Deutsch-d7dade?style=flat-square&labelColor=15181b"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Trendorin/MetaDrop/actions/workflows/ci.yml"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/Trendorin/MetaDrop/ci.yml?branch=main&style=flat-square&label=build"></a>
-  <a href="https://github.com/Trendorin/MetaDrop/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/Trendorin/MetaDrop?style=flat-square&display_name=tag"></a>
-  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-GPL--3.0--or--later-30363d?style=flat-square"></a>
-  <img alt="C++20" src="https://img.shields.io/badge/C%2B%2B-20-30363d?style=flat-square">
-  <img alt="Qt 6 Widgets" src="https://img.shields.io/badge/Qt-6%20Widgets-30363d?style=flat-square">
+  <a href="https://github.com/Trendorin/MetaDrop/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Trendorin/MetaDrop/ci.yml?branch=main&style=flat-square&label=build&labelColor=15181b&color=5d666d"></a>
+  <a href="https://github.com/Trendorin/MetaDrop/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/Trendorin/MetaDrop?style=flat-square&label=release&labelColor=15181b&color=5d666d"></a>
+  <img alt="C++20" src="https://img.shields.io/badge/C%2B%2B-20-5d666d?style=flat-square&labelColor=15181b">
+  <img alt="Qt 6 Widgets" src="https://img.shields.io/badge/Qt-6_Widgets-5d666d?style=flat-square&labelColor=15181b">
+  <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-5d666d?style=flat-square&labelColor=15181b"></a>
 </p>
-
-MetaDrop is a native Linux application for inspecting privacy-sensitive metadata and creating a verified sanitized copy. It uses C++20 and Qt 6 Widgets, follows the active desktop theme, and never sends a file or path over the network.
 
 <p align="center">
-  <a href="https://github.com/Trendorin/MetaDrop/releases/latest"><strong>Download the latest release</strong></a>
-  &nbsp;·&nbsp;
-  <a href="SECURITY.md">Security</a>
-  &nbsp;·&nbsp;
-  <a href="PRIVACY.md">Privacy</a>
+  <a href="#install">Install</a> ·
+  <a href="#build-from-source">Source</a> ·
+  <a href="#uninstall">Uninstall</a> ·
+  <a href="SECURITY.md">Security</a> ·
+  <a href="https://github.com/Trendorin/MetaDrop/releases">Releases</a>
 </p>
 
-## One deliberate workflow
+MetaDrop is a native Linux application that reveals privacy-sensitive file metadata and creates a separately verified sanitized copy. It uses C++20 and Qt 6 Widgets, follows the active desktop theme, and processes files locally without telemetry, cloud services or network uploads.
 
-<table>
-  <tr>
-    <td width="33%"><strong>1. Inspect</strong><br>Drop one file or a batch. MetaDrop lists the embedded fields before changing anything.</td>
-    <td width="33%"><strong>2. Understand</strong><br>Location, identity, device, timestamp, and persistent-ID fields receive a clear risk level.</td>
-    <td width="33%"><strong>3. Sanitize and verify</strong><br>A private copy is cleaned, reopened, rescanned, and saved only when verification passes.</td>
-  </tr>
-</table>
+## What it does
 
-- Native Qt Widgets interface for KDE Plasma, GNOME, Xfce, Cinnamon, and other Linux desktops.
-- System tray, drag-and-drop, batch processing, metadata filtering, and automatic-copy mode.
-- No Electron, web view, account, telemetry, analytics, cloud service, or background network client.
-- Source files are never overwritten in the current release.
+| Step | Result |
+|---|---|
+| Inspect | Shows metadata before changing the file and classifies location, identity, device, time and identifier risks. |
+| Sanitize | Writes to a private staging file; the original is never overwritten. |
+| Verify | Reopens and rescans the result before moving the cleaned copy into place. |
+| Batch | Handles multiple files through drag-and-drop, the file manager or automatic-copy mode. |
 
-## Verified format scope
+### Verified format scope
 
-MetaDrop is intentionally explicit about what each backend can prove. An unsupported file is reported as unsupported; it is never labeled clean.
-
-| Family | Formats | Removed and verified | Important boundary |
+| Family | Formats | Removed and verified | Not treated as metadata |
 |---|---|---|---|
-| Images | JPEG, PNG, WebP, TIFF, DNG, HEIC/HEIF, AVIF | EXIF, IPTC, XMP, image comments, embedded thumbnails | HEIF/AVIF require an Exiv2 build with BMFF support. ICC color profiles are preserved unless explicitly enabled. |
-| Audio | MP3, FLAC, Ogg Vorbis, Opus, M4A/M4B, MP4, WAV, AIFF | Tags exposed by TagLib, including common textual tags and supported artwork/tag containers | Timed metadata tracks and visible video content are outside the MP4 scope. |
-| PDF | PDF | Document Info, catalog/page XMP, PieceInfo, SpiderInfo; the source trailer file identifier is replaced | The rewritten PDF receives a fresh technical identifier. Annotations, form values, attachments, and visible page content are document content, not removed metadata. |
-| Documents | DOCX/XLSX/PPTX, macro-enabled OOXML, ODT/ODS/ODP and templates | Core, extended and custom properties, ODF metadata, preview thumbnails, archive ownership and internal timestamps | Comments, tracked changes, hidden sheets/slides, macros, and visible content are not removed. |
+| Images | JPEG, PNG, WebP, TIFF, DNG, HEIC/HEIF, AVIF | EXIF, IPTC, XMP, comments, thumbnails | Visible pixels; ICC profile unless explicitly selected |
+| Audio | MP3, FLAC, Ogg, Opus, M4A/M4B, MP4, WAV, AIFF | Tags exposed by TagLib and supported artwork containers | Audio/video content and timed metadata tracks |
+| PDF | PDF | Document Info, catalog/page XMP, PieceInfo, SpiderInfo, source trailer ID | Page content, forms, annotations and attachments |
+| Office | OOXML and OpenDocument files/templates | Core, extended and custom properties, ODF metadata, previews, archive dates/ownership | Comments, tracked changes, hidden sheets/slides, macros and visible content |
 
-Technical data required to render a file—dimensions, codec properties, page structure—is shown separately and retained.
+HEIF/AVIF support depends on Exiv2 being built with BMFF support. Unsupported files are reported as unsupported and are never marked clean.
 
+<a id="install"></a>
 ## Install
 
-### AppImage or Debian package
+Download the matching asset and `SHA256SUMS` from the [latest release](https://github.com/Trendorin/MetaDrop/releases/latest).
 
-Download the `.AppImage` or `.deb` and its `SHA256SUMS` file from [Releases](https://github.com/Trendorin/MetaDrop/releases/latest). Verify before running:
+| System | Asset | Command |
+|---|---|---|
+| Any supported x86-64 Linux | `MetaDrop-*-x86_64.AppImage` | `chmod +x MetaDrop-*.AppImage && ./MetaDrop-*.AppImage` |
+| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
+| Fedora / RHEL | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
+| Arch family | `PKGBUILD` | `makepkg -si` |
+
+Verify downloaded files before installation:
 
 ```bash
-sha256sum --check SHA256SUMS
-chmod +x MetaDrop-*.AppImage
-./MetaDrop-*.AppImage
+sha256sum --ignore-missing --check SHA256SUMS
 ```
 
-### Build on Fedora
+<a id="build-from-source"></a>
+## Build from source
+
+Requirements: CMake 3.25+, Ninja, a C++20 compiler, Qt 6.4+, Exiv2, TagLib, qpdf and libarchive.
+
+<details>
+<summary>Fedora build dependencies</summary>
 
 ```bash
 sudo dnf install gcc-c++ cmake ninja-build \
   qt6-qtbase-devel qt6-qtsvg-devel qt6-qttools-devel \
   exiv2-devel taglib-devel qpdf-devel libarchive-devel
+```
+</details>
 
+<details>
+<summary>Ubuntu 24.04+ build dependencies</summary>
+
+```bash
+sudo apt install build-essential cmake ninja-build \
+  qt6-base-dev qt6-svg-dev qt6-tools-dev \
+  libexiv2-dev libtag1-dev libqpdf-dev libarchive-dev
+```
+</details>
+
+```bash
 git clone https://github.com/Trendorin/MetaDrop.git
 cd MetaDrop
 cmake --preset release
@@ -79,37 +99,30 @@ ctest --preset release
 cmake --install build/release --prefix "$HOME/.local"
 ```
 
-### Build on Ubuntu 24.04+
+<a id="uninstall"></a>
+## Uninstall
 
-```bash
-sudo apt install build-essential cmake ninja-build \
-  qt6-base-dev qt6-svg-dev qt6-tools-dev \
-  libexiv2-dev libtag1-dev libqpdf-dev libarchive-dev
+| Installation | Command |
+|---|---|
+| AppImage | Delete the downloaded `MetaDrop-*-x86_64.AppImage` file |
+| Debian / Ubuntu | `sudo apt remove metadrop` |
+| Fedora / RHEL | `sudo dnf remove metadrop` |
+| Arch family | `sudo pacman -Rns metadrop` |
+| Source build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |
 
-cmake --preset release
-cmake --build --preset release
-ctest --preset release
-```
+Optional: remove local preferences with `rm -f "$HOME/.config/Trendorin/MetaDrop.conf"`. Cleaned output files are user documents and are never removed by uninstalling MetaDrop.
 
-## Use
+## Security boundary
 
-1. Drop files into the window or open them with MetaDrop from your file manager.
-2. Select a file to review every field exposed by its verified backend.
-3. Choose **Clean selected** or **Clean all ready**.
-4. Use the saved path shown in the details panel. The `.cleaned` copy has already been reopened and verified.
+- Sources are never overwritten; output is installed only after a successful reopen and rescan.
+- Symbolic links and non-regular input files are rejected.
+- Staging files are owner-only, archive expansion is bounded, and final placement is atomic.
+- Metadata removal reduces accidental disclosure but does not anonymize visible content, filenames, filesystem records or the account used to share a file.
 
-Automatic cleaning can be enabled in Settings. It still inspects and verifies every file and still creates a separate copy.
+Read the [security model](SECURITY.md), [data-handling policy](PRIVACY.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-## Security and privacy
+## Project
 
-Metadata cleaning reduces accidental disclosure; it does not make content anonymous. A face, address, document text, filename, file-system timestamp, hidden revision, or account used to upload the file can still identify someone.
+[Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Contributors](CONTRIBUTORS.md) · [Issue tracker](https://github.com/Trendorin/MetaDrop/issues)
 
-The implementation refuses symbolic links and non-regular inputs, writes staging files with owner-only access, applies archive size and entry-count limits, and installs output atomically after verification. Read the complete [security model](SECURITY.md) and [data-handling policy](PRIVACY.md) before relying on MetaDrop for high-risk material.
-
-## Contributing
-
-Bug reports, format fixtures, accessibility improvements, and backend hardening are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md); contributors are credited without maintaining a fake or manually inflated list in the README.
-
-## License
-
-MetaDrop is licensed under [GPL-3.0-or-later](LICENSE). See [CONTRIBUTORS.md](CONTRIBUTORS.md) for authorship and third-party acknowledgements.
+Maintained by [Trendorin](https://github.com/Trendorin). Licensed under [GPL-3.0-or-later](LICENSE).

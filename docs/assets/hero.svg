@@ -1,76 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" role="img" aria-labelledby="title description">
-  <title id="title">MetaDrop project banner</title>
-  <desc id="description">A minimal preview of MetaDrop inspecting privacy-sensitive metadata on Linux.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">MetaDrop</title>
+  <desc id="desc">Inspect, sanitize and verify file metadata locally on Linux.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1440" y2="560" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#111419"/>
-      <stop offset="1" stop-color="#20262d"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#15191d"/>
+      <stop offset="1" stop-color="#080a0c"/>
     </linearGradient>
-    <linearGradient id="icon" x1="108" y1="137" x2="212" y2="241" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3d4650"/>
-      <stop offset="1" stop-color="#242a31"/>
+    <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#f7f8f9"/>
+      <stop offset="1" stop-color="#aeb5ba"/>
     </linearGradient>
   </defs>
-  <rect width="1440" height="560" fill="url(#bg)"/>
-  <path d="M0 452C270 375 485 508 742 434c260-75 428-23 698 45v81H0z" fill="#252c34" opacity=".46"/>
-  <g transform="translate(76 78)">
-    <rect x="0" y="52" width="112" height="112" rx="23" fill="url(#icon)" stroke="#4d5762"/>
-    <path d="M31 74h38l16 16v27H73V94H53v43h17v11H31V74z" fill="#f2f4f6"/>
-    <path d="M69 74v17h17" fill="none" stroke="#9ba7b3" stroke-width="6" stroke-linejoin="round"/>
-    <path d="M85 111s-16 18-16 29a16 16 0 1 0 32 0c0-11-16-29-16-29z" fill="#8794a1"/>
-    <path d="M78 140l5 5 9-11" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="0" y="223" fill="#f5f7f8" font-family="Inter,system-ui,sans-serif" font-size="64" font-weight="700" letter-spacing="-2">MetaDrop</text>
-    <text x="2" y="266" fill="#b6bec7" font-family="Inter,system-ui,sans-serif" font-size="22">Native metadata privacy for Linux.</text>
-    <text x="2" y="310" fill="#7f8994" font-family="ui-monospace,SFMono-Regular,monospace" font-size="15">C++20  ·  Qt 6 Widgets  ·  local-only</text>
-    <g transform="translate(2 345)" font-family="Inter,system-ui,sans-serif" font-size="14">
-      <rect width="118" height="36" rx="4" fill="#293038" stroke="#414b56"/>
-      <text x="18" y="23" fill="#dce1e6">INSPECT</text>
-      <rect x="130" width="118" height="36" rx="4" fill="#293038" stroke="#414b56"/>
-      <text x="150" y="23" fill="#dce1e6">SANITIZE</text>
-      <rect x="260" width="118" height="36" rx="4" fill="#293038" stroke="#414b56"/>
-      <text x="285" y="23" fill="#dce1e6">VERIFY</text>
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <g opacity=".14" stroke="#d8dde0">
+    <path d="M0 40h1200M0 280h1200M40 0v320M1160 0v320"/>
+    <path d="M860 0 720 320M1040 0 900 320M1220 0 1080 320"/>
+  </g>
+  <g transform="translate(72 62)">
+    <rect width="196" height="196" rx="14" fill="#101317" stroke="#4d555b" stroke-width="2"/>
+    <path d="M45 48h37l21 24 22-24h28v83l-29 10v-40l-21 23-25-27v58H45z" fill="url(#silver)"/>
+    <path d="M127 50v28h27" fill="none" stroke="#737c83" stroke-width="5"/>
+    <path d="M145 125c-9 13-16 23-16 33a16 16 0 0 0 32 0c0-10-7-20-16-33z" fill="#cbd0d3"/>
+    <g fill="#858e95"><rect x="164" y="115" width="8" height="8"/><rect x="176" y="128" width="6" height="6"/><rect x="161" y="140" width="7" height="7"/></g>
+  </g>
+  <g transform="translate(315 78)" font-family="Inter,Segoe UI,DejaVu Sans,sans-serif">
+    <text x="0" y="80" fill="#f4f5f6" font-size="82" font-weight="720" letter-spacing="5">METADROP</text>
+    <text x="4" y="121" fill="#aab1b6" font-size="20" letter-spacing="4">INSPECT · SANITIZE · VERIFY</text>
+    <g transform="translate(4 154)" font-size="14" font-weight="600" letter-spacing="1">
+      <rect width="92" height="32" fill="#22282d" stroke="#4d555b"/><text x="16" y="21" fill="#dfe2e4">C++20</text>
+      <rect x="104" width="142" height="32" fill="#22282d" stroke="#4d555b"/><text x="120" y="21" fill="#dfe2e4">QT 6 WIDGETS</text>
+      <rect x="258" width="120" height="32" fill="#22282d" stroke="#4d555b"/><text x="274" y="21" fill="#dfe2e4">LOCAL ONLY</text>
+      <rect x="390" width="144" height="32" fill="#22282d" stroke="#4d555b"/><text x="406" y="21" fill="#dfe2e4">SOURCE SAFE</text>
     </g>
   </g>
-  <g transform="translate(650 62)">
-    <rect width="710" height="436" rx="10" fill="#eceff1" stroke="#59636e" stroke-width="2"/>
-    <rect width="710" height="50" rx="10" fill="#d8dde1"/>
-    <path d="M0 40h710v10H0z" fill="#d8dde1"/>
-    <circle cx="24" cy="25" r="5" fill="#89939d"/>
-    <circle cx="43" cy="25" r="5" fill="#89939d"/>
-    <circle cx="62" cy="25" r="5" fill="#89939d"/>
-    <text x="91" y="31" fill="#252b31" font-family="Inter,system-ui,sans-serif" font-size="16" font-weight="600">MetaDrop — Metadata Cleaner</text>
-    <rect x="20" y="70" width="670" height="78" fill="#f8f9fa" stroke="#aab2b9"/>
-    <path d="M337 88v22m-9-9 9 9 9-9" fill="none" stroke="#59636d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="276" y="131" fill="#4f5963" font-family="Inter,system-ui,sans-serif" font-size="14">Drop files to inspect</text>
-    <text x="20" y="178" fill="#30373e" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700">FILES</text>
-    <rect x="20" y="190" width="282" height="188" fill="#f8f9fa" stroke="#aab2b9"/>
-    <rect x="20" y="190" width="282" height="36" fill="#e2e6e9"/>
-    <text x="34" y="213" fill="#343c44" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600">FILE</text>
-    <text x="208" y="213" fill="#343c44" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600">RISK</text>
-    <rect x="21" y="227" width="280" height="42" fill="#fff"/>
-    <text x="34" y="252" fill="#283039" font-family="Inter,system-ui,sans-serif" font-size="13">street-photo.jpg</text>
-    <text x="208" y="252" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">CRITICAL</text>
-    <rect x="21" y="269" width="280" height="42" fill="#f0f2f4"/>
-    <text x="34" y="294" fill="#283039" font-family="Inter,system-ui,sans-serif" font-size="13">report.pdf</text>
-    <text x="208" y="294" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">HIGH</text>
-    <rect x="21" y="311" width="280" height="42" fill="#fff"/>
-    <text x="34" y="336" fill="#283039" font-family="Inter,system-ui,sans-serif" font-size="13">notes.docx</text>
-    <text x="208" y="336" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">MEDIUM</text>
-    <text x="326" y="178" fill="#30373e" font-family="Inter,system-ui,sans-serif" font-size="14" font-weight="700">12 REMOVABLE FIELDS</text>
-    <rect x="326" y="190" width="364" height="188" fill="#f8f9fa" stroke="#aab2b9"/>
-    <rect x="326" y="190" width="364" height="36" fill="#e2e6e9"/>
-    <text x="340" y="213" fill="#343c44" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600">METADATA</text>
-    <text x="610" y="213" fill="#343c44" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600">RISK</text>
-    <text x="340" y="251" fill="#283039" font-family="ui-monospace,SFMono-Regular,monospace" font-size="12">GPS Latitude</text>
-    <text x="610" y="251" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">CRITICAL</text>
-    <line x1="340" y1="263" x2="676" y2="263" stroke="#d8dde1"/>
-    <text x="340" y="291" fill="#283039" font-family="ui-monospace,SFMono-Regular,monospace" font-size="12">Camera Serial</text>
-    <text x="610" y="291" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">HIGH</text>
-    <line x1="340" y1="303" x2="676" y2="303" stroke="#d8dde1"/>
-    <text x="340" y="331" fill="#283039" font-family="ui-monospace,SFMono-Regular,monospace" font-size="12">DateTimeOriginal</text>
-    <text x="610" y="331" fill="#4d5964" font-family="Inter,system-ui,sans-serif" font-size="12">MEDIUM</text>
-    <rect x="530" y="394" width="160" height="28" rx="3" fill="#323a42"/>
-    <text x="558" y="413" fill="#f6f7f8" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="600">CLEAN SELECTED</text>
-    <text x="20" y="414" fill="#68737d" font-family="Inter,system-ui,sans-serif" font-size="11">Source files are never overwritten.</text>
-  </g>
+  <rect y="314" width="1200" height="6" fill="#c7ccd0"/>
 </svg>

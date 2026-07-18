@@ -1,5 +1,5 @@
 Name:           metadrop
-Version:        0.1.1
+Version:        0.1.2
 Release:        1%{?dist}
 Summary:        Native Linux metadata inspector and sanitizer
 License:        GPL-3.0-or-later
@@ -44,10 +44,13 @@ follows the active Linux desktop theme.
 %doc %{_datadir}/doc/metadrop/copyright
 %{_bindir}/metadrop
 %{_datadir}/applications/io.github.trendorin.MetaDrop.desktop
-%{_datadir}/icons/hicolor/scalable/apps/io.github.trendorin.MetaDrop.svg
+%{_datadir}/icons/hicolor/512x512/apps/io.github.trendorin.MetaDrop.png
 %{_datadir}/metainfo/io.github.trendorin.MetaDrop.metainfo.xml
 
 %changelog
+* Sun Jul 19 2026 Trendorin - 0.1.2-1
+- Refresh application identity and multilingual installation documentation
+
 * Sat Jul 18 2026 Trendorin - 0.1.1-1
 - Regenerate PDF identifiers and install package notices
 

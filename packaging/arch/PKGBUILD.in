@@ -1,0 +1,27 @@
+pkgname=metadrop
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc='Native Linux metadata inspector and sanitizer'
+arch=('x86_64')
+url='https://github.com/Trendorin/MetaDrop'
+license=('GPL-3.0-or-later')
+depends=('glibc' 'gcc-libs' 'qt6-base' 'qt6-svg' 'exiv2' 'taglib' 'qpdf' 'libarchive')
+makedepends=('cmake' 'ninja' 'qt6-tools')
+source=("MetaDrop-$pkgver-source.tar.gz::$url/releases/download/v$pkgver/MetaDrop-$pkgver-source.tar.gz")
+sha256sums=('@SOURCE_SHA256@')
+
+build() {
+  cmake -S "MetaDrop-$pkgver" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DMETADROP_BUILD_TESTS=ON
+  cmake --build build
+}
+
+check() {
+  ctest --test-dir build --output-on-failure
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}

@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     QApplication::setApplicationDisplayName(QStringLiteral("MetaDrop"));
     QApplication::setApplicationVersion(QString::fromLatin1(METADROP_VERSION));
     QApplication::setDesktopFileName(QString::fromLatin1(METADROP_APP_ID));
-    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/metadrop.svg")));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/metadrop.png")));
 
     qRegisterMetaType<metadrop::InspectionReport>();
     qRegisterMetaType<metadrop::SanitizeReport>();

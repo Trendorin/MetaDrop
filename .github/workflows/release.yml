@@ -10,6 +10,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   package:
@@ -23,7 +25,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -31,7 +33,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
-            build-essential cmake curl file ninja-build patchelf \
+            build-essential cmake curl file ninja-build patchelf rpm \
             qt6-base-dev qt6-svg-dev qt6-tools-dev \
             libarchive-dev libexiv2-dev libqpdf-dev libtag1-dev
 
@@ -68,11 +70,12 @@ jobs:
           cmake --build build --parallel 2
           ctest --test-dir build --output-on-failure
 
-      - name: Build Debian package
+      - name: Build native packages
         run: |
           mkdir -p dist package-output
           cpack --config build/CPackConfig.cmake -G DEB -B package-output
-          cp package-output/*.deb dist/
+          cpack --config build/CPackConfig.cmake -G RPM -B package-output
+          cp package-output/*.deb package-output/*.rpm dist/
 
       - name: Assemble AppDir
         run: |
@@ -98,7 +101,7 @@ jobs:
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
             --desktop-file packaging/io.github.trendorin.MetaDrop.desktop \
-            --icon-file resources/icons/io.github.trendorin.MetaDrop.svg \
+            --icon-file resources/icons/io.github.trendorin.MetaDrop.png \
             --plugin qt \
             --output appimage
           mv "$LDAI_OUTPUT" dist/
@@ -110,10 +113,18 @@ jobs:
           git archive --format=tar.gz \
             --prefix="MetaDrop-${VERSION}/" \
             --output="dist/MetaDrop-${VERSION}-source.tar.gz" HEAD
+          source_hash="$(sha256sum "dist/MetaDrop-${VERSION}-source.tar.gz" | cut -d' ' -f1)"
+          sed -e "s/@VERSION@/${VERSION}/g" -e "s/@SOURCE_SHA256@/${source_hash}/g" \
+            packaging/arch/PKGBUILD.in > dist/PKGBUILD
           cd dist
           find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' \
             | sort --zero-terminated \
             | xargs --null --no-run-if-empty sha256sum > SHA256SUMS
+
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: dist/*
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
@@ -132,6 +143,6 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: MetaDrop ${{ steps.version.outputs.version }}
           body_path: docs/release-notes-${{ steps.version.outputs.version }}.md
-          generate_release_notes: true
+          generate_release_notes: false
           fail_on_unmatched_files: true
           files: dist/*
