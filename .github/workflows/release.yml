@@ -61,8 +61,9 @@ jobs:
 
       - name: Build Debian package
         run: |
-          mkdir -p dist
-          cpack --config build/CPackConfig.cmake -G DEB -B dist
+          mkdir -p dist package-output
+          cpack --config build/CPackConfig.cmake -G DEB -B package-output
+          cp package-output/*.deb dist/
 
       - name: Assemble AppDir
         run: |
@@ -98,7 +99,9 @@ jobs:
             --prefix="MetaDrop-${VERSION}/" \
             --output="dist/MetaDrop-${VERSION}-source.tar.gz" HEAD
           cd dist
-          sha256sum ./* > SHA256SUMS
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' \
+            | sort --zero-terminated \
+            | xargs --null --no-run-if-empty sha256sum > SHA256SUMS
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
