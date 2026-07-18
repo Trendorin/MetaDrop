@@ -1,0 +1,16 @@
+/build/
+/AppDir/
+/.cache/
+/.clangd/
+/.idea/
+/.vscode/
+CMakeUserPresets.json
+compile_commands.json
+*.AppImage
+*.deb
+*.rpm
+*.tar.gz
+*.user
+*.qm
+*.swp
+*~

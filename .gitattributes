@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.cpp text eol=lf
+*.h text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+*.ts text eol=lf
+
+docs/assets/*.svg linguist-generated=false
+translations/*.ts linguist-language=XML

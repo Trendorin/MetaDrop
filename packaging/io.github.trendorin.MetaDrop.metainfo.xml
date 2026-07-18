@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.trendorin.MetaDrop</id>
+  <name>MetaDrop</name>
+  <summary>Inspect and remove privacy-sensitive file metadata</summary>
+  <developer id="io.github.trendorin">
+    <name>Trendorin</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>MetaDrop is a native Linux utility for reviewing metadata before creating a sanitized copy.</p>
+    <p>It processes files locally, follows the system Qt theme, and verifies every cleaned result before saving it.</p>
+    <ul>
+      <li>Inspect EXIF, IPTC, XMP, audio tags, PDF document information, and office metadata.</li>
+      <li>Highlight location, identity, device, timestamp, and persistent identifier risks.</li>
+      <li>Clean batches without overwriting source files.</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.trendorin.MetaDrop.desktop</launchable>
+  <provides>
+    <binary>metadrop</binary>
+    <mediatype>image/jpeg</mediatype>
+    <mediatype>image/png</mediatype>
+    <mediatype>audio/mpeg</mediatype>
+    <mediatype>application/pdf</mediatype>
+    <mediatype>application/vnd.openxmlformats-officedocument.wordprocessingml.document</mediatype>
+    <mediatype>application/vnd.oasis.opendocument.text</mediatype>
+  </provides>
+  <url type="homepage">https://github.com/Trendorin/MetaDrop</url>
+  <url type="bugtracker">https://github.com/Trendorin/MetaDrop/issues</url>
+  <url type="vcs-browser">https://github.com/Trendorin/MetaDrop</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-07-18">
+      <description>
+        <p>Initial native Linux release.</p>
+      </description>
+    </release>
+  </releases>
+</component>
