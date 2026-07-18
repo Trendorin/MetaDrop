@@ -32,6 +32,11 @@
   <url type="vcs-browser">https://github.com/Trendorin/MetaDrop</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.1" date="2026-07-18">
+      <description>
+        <p>Regenerate PDF file identifiers and harden release packaging.</p>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-07-18">
       <description>
         <p>Initial native Linux release.</p>

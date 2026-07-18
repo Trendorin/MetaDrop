@@ -39,12 +39,21 @@ jobs:
         id: version
         shell: bash
         run: |
+          project_version="$(awk '$1 == "VERSION" { print $2; exit }' CMakeLists.txt)"
+          if [[ -z "${project_version}" ]]; then
+            echo "Could not resolve the project version" >&2
+            exit 1
+          fi
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             version="${GITHUB_REF_NAME#v}"
+            if [[ "${version}" != "${project_version}" ]]; then
+              echo "Tag version ${version} does not match project version ${project_version}" >&2
+              exit 1
+            fi
           elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            version="0.1.0"
+            version="${project_version}"
           else
-            version="0.1.0-dev.${GITHUB_RUN_NUMBER}"
+            version="${project_version}-dev.${GITHUB_RUN_NUMBER}"
           fi
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
@@ -68,10 +77,12 @@ jobs:
       - name: Assemble AppDir
         run: |
           DESTDIR="$PWD/AppDir" cmake --install build --prefix /usr
+          mv AppDir/usr/share/metainfo/io.github.trendorin.MetaDrop.metainfo.xml \
+            AppDir/usr/share/metainfo/io.github.trendorin.MetaDrop.appdata.xml
 
       - name: Build AppImage
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
           curl --fail --location --silent --show-error \
             --output linuxdeploy-x86_64.AppImage \
@@ -82,14 +93,15 @@ jobs:
           chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
           export PATH="$PWD:$PATH"
           export QMAKE=/usr/bin/qmake6
-          export OUTPUT="MetaDrop-${VERSION}-x86_64.AppImage"
+          export LINUXDEPLOY_OUTPUT_VERSION="${RELEASE_VERSION}"
+          export LDAI_OUTPUT="MetaDrop-${RELEASE_VERSION}-x86_64.AppImage"
           ./linuxdeploy-x86_64.AppImage \
             --appdir AppDir \
             --desktop-file packaging/io.github.trendorin.MetaDrop.desktop \
             --icon-file resources/icons/io.github.trendorin.MetaDrop.svg \
             --plugin qt \
             --output appimage
-          mv "$OUTPUT" dist/
+          mv "$LDAI_OUTPUT" dist/
 
       - name: Create source archive and checksums
         env:
@@ -116,10 +128,10 @@ jobs:
           (github.ref_name == 'main' && startsWith(github.event.head_commit.message, 'release:'))
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.1.0' }}
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}', steps.version.outputs.version) }}
           target_commitish: ${{ github.sha }}
-          name: MetaDrop 0.1.0
-          body_path: docs/release-notes-0.1.0.md
+          name: MetaDrop ${{ steps.version.outputs.version }}
+          body_path: docs/release-notes-${{ steps.version.outputs.version }}.md
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: dist/*

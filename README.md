@@ -47,7 +47,7 @@ MetaDrop is intentionally explicit about what each backend can prove. An unsuppo
 |---|---|---|---|
 | Images | JPEG, PNG, WebP, TIFF, DNG, HEIC/HEIF, AVIF | EXIF, IPTC, XMP, image comments, embedded thumbnails | HEIF/AVIF require an Exiv2 build with BMFF support. ICC color profiles are preserved unless explicitly enabled. |
 | Audio | MP3, FLAC, Ogg Vorbis, Opus, M4A/M4B, MP4, WAV, AIFF | Tags exposed by TagLib, including common textual tags and supported artwork/tag containers | Timed metadata tracks and visible video content are outside the MP4 scope. |
-| PDF | PDF | Document Info, catalog/page XMP, PieceInfo, SpiderInfo | Annotations, form values, attachments, and visible page content are document content, not removed metadata. |
+| PDF | PDF | Document Info, catalog/page XMP, PieceInfo, SpiderInfo; the source trailer file identifier is replaced | The rewritten PDF receives a fresh technical identifier. Annotations, form values, attachments, and visible page content are document content, not removed metadata. |
 | Documents | DOCX/XLSX/PPTX, macro-enabled OOXML, ODT/ODS/ODP and templates | Core, extended and custom properties, ODF metadata, preview thumbnails, archive ownership and internal timestamps | Comments, tracked changes, hidden sheets/slides, macros, and visible content are not removed. |
 
 Technical data required to render a file—dimensions, codec properties, page structure—is shown separately and retained.

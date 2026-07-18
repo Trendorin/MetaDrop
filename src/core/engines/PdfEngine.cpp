@@ -29,6 +29,13 @@ QString pdfValue(QPDFObjectHandle object) {
     }
 }
 
+std::string rawFileIdentifier(QPDFObjectHandle trailer) {
+    if (!trailer.hasKey("/ID")) {
+        return {};
+    }
+    return trailer.getKey("/ID").unparse();
+}
+
 void inspectDictionary(QPDFObjectHandle dictionary,
                        const QString& group,
                        QList<MetadataEntry>* entries) {
@@ -86,12 +93,21 @@ InspectionReport PdfEngine::inspect(const QString& path) const {
 
     try {
         QPDF pdf;
-        pdf.processFile(QFile::encodeName(path).constData());
+        const QByteArray encodedPath = QFile::encodeName(path);
+        pdf.processFile(encodedPath.constData());
 
         QPDFObjectHandle trailer = pdf.getTrailer();
         if (trailer.hasKey("/Info")) {
             inspectDictionary(trailer.getKey("/Info"), QStringLiteral("PDF document info"),
                               &report.entries);
+        }
+        if (trailer.hasKey("/ID")) {
+            report.entries.append(
+                {QStringLiteral("PDF trailer"), QStringLiteral("File identifier"),
+                 pdfValue(trailer.getKey("/ID")),
+                 QStringLiteral("A persistent identifier can link revisions or copies; MetaDrop "
+                                "replaces it while rewriting the PDF"),
+                 RiskLevel::High, false, false});
         }
 
         QPDFObjectHandle root = pdf.getRoot();
@@ -141,10 +157,13 @@ bool PdfEngine::sanitize(const QString& sourcePath,
     Q_UNUSED(warnings)
     try {
         QPDF pdf;
-        pdf.processFile(QFile::encodeName(sourcePath).constData());
+        const QByteArray sourceName = QFile::encodeName(sourcePath);
+        pdf.processFile(sourceName.constData());
 
         QPDFObjectHandle trailer = pdf.getTrailer();
+        const std::string originalIdentifier = rawFileIdentifier(trailer);
         trailer.removeKey("/Info");
+        trailer.removeKey("/ID");
 
         QPDFObjectHandle root = pdf.getRoot();
         root.removeKey("/Metadata");
@@ -152,10 +171,27 @@ bool PdfEngine::sanitize(const QString& sourcePath,
         root.removeKey("/SpiderInfo");
         removePageMetadata(pdf);
 
-        QPDFWriter writer(pdf, QFile::encodeName(outputPath).constData());
-        writer.setObjectStreamMode(qpdf_o_generate);
-        writer.setCompressStreams(true);
-        writer.write();
+        const QByteArray outputName = QFile::encodeName(outputPath);
+        {
+            QPDFWriter writer(pdf, outputName.constData());
+            writer.setObjectStreamMode(qpdf_o_generate);
+            writer.setCompressStreams(true);
+            writer.write();
+        }
+
+        if (!originalIdentifier.empty()) {
+            QPDF verification;
+            verification.processFile(outputName.constData());
+            const std::string replacementIdentifier =
+                rawFileIdentifier(verification.getTrailer());
+            if (replacementIdentifier.empty() || replacementIdentifier == originalIdentifier) {
+                QFile::remove(outputPath);
+                if (error != nullptr) {
+                    *error = QStringLiteral("The PDF file identifier could not be replaced");
+                }
+                return false;
+            }
+        }
         return true;
     } catch (const std::exception& exception) {
         QFile::remove(outputPath);
