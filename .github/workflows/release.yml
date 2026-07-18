@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    name: Build release artifacts
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.ref_type == 'tag' ||
+      startsWith(github.event.head_commit.message, 'release:')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install build and packaging dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential cmake curl file ninja-build patchelf \
+            qt6-base-dev qt6-svg-dev qt6-tools-dev \
+            libarchive-dev libexiv2-dev libqpdf-dev libtag1-dev
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            version="0.1.0"
+          else
+            version="0.1.0-dev.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DMETADROP_BUILD_TESTS=ON
+
+      - name: Build and test
+        run: |
+          cmake --build build --parallel 2
+          ctest --test-dir build --output-on-failure
+
+      - name: Build Debian package
+        run: |
+          mkdir -p dist
+          cpack --config build/CPackConfig.cmake -G DEB -B dist
+
+      - name: Assemble AppDir
+        run: |
+          DESTDIR="$PWD/AppDir" cmake --install build --prefix /usr
+
+      - name: Build AppImage
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          curl --fail --location --silent --show-error \
+            --output linuxdeploy-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl --fail --location --silent --show-error \
+            --output linuxdeploy-plugin-qt-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+          export PATH="$PWD:$PATH"
+          export QMAKE=/usr/bin/qmake6
+          export OUTPUT="MetaDrop-${VERSION}-x86_64.AppImage"
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --desktop-file packaging/io.github.trendorin.MetaDrop.desktop \
+            --icon-file resources/icons/io.github.trendorin.MetaDrop.svg \
+            --plugin qt \
+            --output appimage
+          mv "$OUTPUT" dist/
+
+      - name: Create source archive and checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git archive --format=tar.gz \
+            --prefix="MetaDrop-${VERSION}/" \
+            --output="dist/MetaDrop-${VERSION}-source.tar.gz" HEAD
+          cd dist
+          sha256sum ./* > SHA256SUMS
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: MetaDrop-${{ steps.version.outputs.version }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: >-
+          github.ref_type == 'tag' ||
+          (github.ref_name == 'main' && startsWith(github.event.head_commit.message, 'release:'))
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.1.0' }}
+          target_commitish: ${{ github.sha }}
+          name: MetaDrop 0.1.0
+          body_path: docs/release-notes-0.1.0.md
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: dist/*
