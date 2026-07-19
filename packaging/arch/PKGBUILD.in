@@ -7,6 +7,7 @@ url='https://github.com/Trendorin/MetaDrop'
 license=('GPL-3.0-or-later')
 depends=('glibc' 'gcc-libs' 'qt6-base' 'qt6-svg' 'exiv2' 'taglib' 'qpdf' 'libarchive')
 makedepends=('cmake' 'ninja' 'qt6-tools')
+options=('!debug')
 source=("MetaDrop-$pkgver-source.tar.gz::$url/releases/download/v$pkgver/MetaDrop-$pkgver-source.tar.gz")
 sha256sums=('@SOURCE_SHA256@')
 

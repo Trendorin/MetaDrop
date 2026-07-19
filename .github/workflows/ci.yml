@@ -120,6 +120,7 @@ jobs:
           pacman -Syu --noconfirm --needed \
             cmake git ninja qt6-base qt6-svg qt6-tools \
             exiv2 taglib qpdf libarchive
+          sed -i '/^NoExtract[[:space:]]*=.*usr\/share\/doc/d' /etc/pacman.conf
 
       - name: Check out source
         uses: actions/checkout@v7
@@ -152,6 +153,7 @@ jobs:
         run: |
           package_file="/tmp/metadrop-package/metadrop-${VERSION}-1-x86_64.pkg.tar.zst"
           test -f "${package_file}"
+          test "$(find /tmp/metadrop-package -maxdepth 1 -type f -name '*.pkg.tar.zst' | wc -l)" -eq 1
           pacman -Qip "${package_file}"
           pacman -Qlp "${package_file}" | tee /tmp/metadrop-package-files.txt
           grep -q 'usr/bin/metadrop$' /tmp/metadrop-package-files.txt
