@@ -2,6 +2,7 @@
 
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QMimeData>
@@ -33,24 +34,24 @@ DropArea::DropArea(QWidget* parent) : QFrame(parent) {
     icon->setAlignment(Qt::AlignCenter);
     icon->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    auto* title = new QLabel(tr("Drop files to inspect"), this);
-    QFont titleFont = title->font();
+    title_ = new QLabel(this);
+    QFont titleFont = title_->font();
     titleFont.setBold(true);
     titleFont.setPointSizeF(titleFont.pointSizeF() + 1.0);
-    title->setFont(titleFont);
-    title->setAlignment(Qt::AlignCenter);
-    title->setAttribute(Qt::WA_TransparentForMouseEvents);
+    title_->setFont(titleFont);
+    title_->setAlignment(Qt::AlignCenter);
+    title_->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-    auto* subtitle =
-        new QLabel(tr("Images, audio, PDF, OpenDocument, and Microsoft Office files"), this);
-    subtitle->setAlignment(Qt::AlignCenter);
-    subtitle->setWordWrap(true);
-    subtitle->setForegroundRole(QPalette::PlaceholderText);
-    subtitle->setAttribute(Qt::WA_TransparentForMouseEvents);
+    subtitle_ = new QLabel(this);
+    subtitle_->setAlignment(Qt::AlignCenter);
+    subtitle_->setWordWrap(true);
+    subtitle_->setForegroundRole(QPalette::PlaceholderText);
+    subtitle_->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     layout->addWidget(icon);
-    layout->addWidget(title);
-    layout->addWidget(subtitle);
+    layout->addWidget(title_);
+    layout->addWidget(subtitle_);
+    retranslateUi();
     normalPalette_ = palette();
 }
 
@@ -92,6 +93,20 @@ void DropArea::keyPressEvent(QKeyEvent* event) {
         return;
     }
     QFrame::keyPressEvent(event);
+}
+
+void DropArea::changeEvent(QEvent* event) {
+    QFrame::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange) {
+        retranslateUi();
+    }
+}
+
+void DropArea::retranslateUi() {
+    setAccessibleName(tr("File drop area"));
+    setAccessibleDescription(tr("Drop files here or activate this area to open a file picker"));
+    title_->setText(tr("Drop files to inspect"));
+    subtitle_->setText(tr("Images, audio, PDF, OpenDocument, and Microsoft Office files"));
 }
 
 void DropArea::setHighlighted(const bool highlighted) {

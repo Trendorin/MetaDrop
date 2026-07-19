@@ -1,4 +1,5 @@
 #include "app/SingleInstance.h"
+#include "app/LanguageManager.h"
 #include "core/AppSettings.h"
 #include "core/MetadataTypes.h"
 #include "ui/MainWindow.h"
@@ -7,33 +8,11 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QIcon>
-#include <QLocale>
 #include <QMessageBox>
-#include <QTranslator>
 
 #ifdef Q_OS_UNIX
 #include <sys/stat.h>
 #endif
-
-namespace {
-
-bool loadTranslation(QApplication& application,
-                     QTranslator* translator,
-                     const metadrop::SettingsSnapshot& settings) {
-    const bool wantsRussian = settings.language == QStringLiteral("ru") ||
-                              (settings.language == QStringLiteral("system") &&
-                               QLocale::system().language() == QLocale::Russian);
-    if (!wantsRussian) {
-        return false;
-    }
-    if (!translator->load(QStringLiteral(":/i18n/metadrop_ru.qm"))) {
-        return false;
-    }
-    application.installTranslator(translator);
-    return true;
-}
-
-} // namespace
 
 int main(int argc, char* argv[]) {
 #ifdef Q_OS_UNIX
@@ -53,8 +32,11 @@ int main(int argc, char* argv[]) {
     qRegisterMetaType<metadrop::SanitizeReport>();
 
     metadrop::AppSettings settings;
-    QTranslator translator;
-    loadTranslation(application, &translator, settings.snapshot());
+    metadrop::LanguageManager languages;
+    (void)languages.applyLanguage(settings.snapshot().language);
+    QObject::connect(&settings, &metadrop::AppSettings::changed, &languages, [&settings, &languages] {
+        (void)languages.applyLanguage(settings.snapshot().language);
+    });
 
     QCommandLineParser parser;
     parser.setApplicationDescription(
