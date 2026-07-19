@@ -101,18 +101,24 @@ QVariant MetadataTreeModel::headerData(const int section,
 }
 
 void MetadataTreeModel::setReport(const InspectionReport& report) {
+    report_ = report;
+    hasReport_ = true;
+    rebuild();
+}
+
+void MetadataTreeModel::rebuild() {
     beginResetModel();
     root_ = std::make_unique<Node>();
 
     QMap<QString, QList<MetadataEntry>> grouped;
-    for (const auto& entry : report.entries) {
+    for (const auto& entry : report_.entries) {
         grouped[entry.group].append(entry);
     }
 
     for (auto iterator = grouped.cbegin(); iterator != grouped.cend(); ++iterator) {
         auto group = std::make_unique<Node>();
         group->parent = root_.get();
-        group->key = iterator.key();
+        group->key = localizedMetadataText(iterator.key());
         group->value = tr("%1 fields").arg(iterator.value().size());
         group->group = true;
 
@@ -127,12 +133,13 @@ void MetadataTreeModel::setReport(const InspectionReport& report) {
         for (const auto& entry : entries) {
             auto child = std::make_unique<Node>();
             child->parent = group.get();
-            child->key = entry.key;
+            child->key = localizedMetadataText(entry.key);
             child->value = entry.value;
             child->risk = entry.technical ? tr("Technical") : riskLevelName(entry.risk);
             child->toolTip = entry.privacyReason.isEmpty()
-                                 ? entry.value
-                                 : entry.privacyReason + QStringLiteral("\n\n") + entry.value;
+                                 ? child->value
+                                 : localizedMetadataText(entry.privacyReason) +
+                                       QStringLiteral("\n\n") + child->value;
             group->children.push_back(std::move(child));
         }
         root_->children.push_back(std::move(group));
@@ -143,7 +150,16 @@ void MetadataTreeModel::setReport(const InspectionReport& report) {
 void MetadataTreeModel::clear() {
     beginResetModel();
     root_ = std::make_unique<Node>();
+    report_ = {};
+    hasReport_ = false;
     endResetModel();
+}
+
+void MetadataTreeModel::retranslate() {
+    emit headerDataChanged(Qt::Horizontal, 0, 2);
+    if (hasReport_) {
+        rebuild();
+    }
 }
 
 int MetadataTreeModel::childRow(const Node* node) {

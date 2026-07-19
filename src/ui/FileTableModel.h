@@ -39,6 +39,7 @@ public:
     void setCleaned(const QString& path, const SanitizeReport& report);
     void removeRowsByIndex(QList<int> rows);
     void clear();
+    void retranslate();
 
     [[nodiscard]] int rowForPath(const QString& path) const;
     [[nodiscard]] const FileRecord* recordAt(int row) const;

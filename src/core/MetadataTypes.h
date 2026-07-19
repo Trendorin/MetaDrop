@@ -63,6 +63,7 @@ struct SanitizeReport {
 
 [[nodiscard]] QString riskLevelName(RiskLevel level);
 [[nodiscard]] QString jobStateName(JobState state);
+[[nodiscard]] QString localizedMetadataText(const QString& source);
 
 } // namespace metadrop
 

@@ -14,6 +14,7 @@
 #include <QClipboard>
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QEvent>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFutureWatcher>
@@ -55,6 +56,13 @@ MainWindow::MainWindow(AppSettings* settings, QWidget* parent)
 }
 
 MainWindow::~MainWindow() = default;
+
+void MainWindow::changeEvent(QEvent* event) {
+    QMainWindow::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange) {
+        retranslateUi();
+    }
+}
 
 void MainWindow::setTrayEnabled(const bool enabled) {
     trayEnabled_ = enabled && QSystemTrayIcon::isSystemTrayAvailable();
@@ -174,8 +182,9 @@ void MainWindow::showCurrentDetails() {
 
     if (!record->report.valid) {
         metadata_->clear();
-        detailsSummary_->setText(record->error.isEmpty() ? tr("Inspection is in progress…")
-                                                        : record->error);
+        detailsSummary_->setText(record->error.isEmpty()
+                                     ? tr("Inspection is in progress…")
+                                     : localizedMetadataText(record->error));
         detailsWarning_->clear();
         refreshActions();
         return;
@@ -188,7 +197,11 @@ void MainWindow::showCurrentDetails() {
             .arg(record->report.removableCount())
             .arg(riskLevelName(record->report.highestRisk())));
 
-    QStringList notes = record->report.warnings;
+    QStringList notes;
+    notes.reserve(record->report.warnings.size() + 1);
+    for (const QString& warning : record->report.warnings) {
+        notes.append(localizedMetadataText(warning));
+    }
     if (!record->outputPath.isEmpty()) {
         notes.prepend(tr("Verified copy: %1").arg(record->outputPath));
     }
@@ -242,19 +255,19 @@ void MainWindow::buildUi() {
     titleFont.setBold(true);
     titleFont.setPointSizeF(titleFont.pointSizeF() + 2.0);
     title->setFont(titleFont);
-    auto* subtitle = new QLabel(tr("Inspect first. Remove locally. Verify before saving."), central);
-    subtitle->setForegroundRole(QPalette::PlaceholderText);
+    subtitle_ = new QLabel(central);
+    subtitle_->setForegroundRole(QPalette::PlaceholderText);
     titleColumn->addWidget(title);
-    titleColumn->addWidget(subtitle);
+    titleColumn->addWidget(subtitle_);
     header->addWidget(appIcon);
     header->addLayout(titleColumn);
     header->addStretch();
-    auto* addButton = new QPushButton(tr("Add files…"), central);
-    addButton->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    auto* settingsButton = new QPushButton(tr("Settings"), central);
-    settingsButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogDetailedView));
-    header->addWidget(addButton);
-    header->addWidget(settingsButton);
+    addButton_ = new QPushButton(central);
+    addButton_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+    settingsButton_ = new QPushButton(central);
+    settingsButton_->setIcon(style()->standardIcon(QStyle::SP_FileDialogDetailedView));
+    header->addWidget(addButton_);
+    header->addWidget(settingsButton_);
     root->addLayout(header);
 
     dropArea_ = new DropArea(central);
@@ -275,11 +288,11 @@ void MainWindow::buildUi() {
     auto* fileLayout = new QVBoxLayout(filePanel);
     fileLayout->setContentsMargins(0, 0, 0, 0);
     fileLayout->setSpacing(6);
-    auto* fileHeading = new QLabel(tr("Files"), filePanel);
-    QFont sectionFont = fileHeading->font();
+    fileHeading_ = new QLabel(filePanel);
+    QFont sectionFont = fileHeading_->font();
     sectionFont.setBold(true);
-    fileHeading->setFont(sectionFont);
-    fileLayout->addWidget(fileHeading);
+    fileHeading_->setFont(sectionFont);
+    fileLayout->addWidget(fileHeading_);
     fileTable_ = new QTableView(filePanel);
     fileTable_->setModel(files_);
     fileTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -302,13 +315,13 @@ void MainWindow::buildUi() {
     fileLayout->addWidget(fileTable_, 1);
 
     auto* fileButtons = new QHBoxLayout();
-    auto* removeButton = new QPushButton(tr("Remove"), filePanel);
-    auto* cleanSelectedButton = new QPushButton(tr("Clean selected"), filePanel);
-    auto* cleanAllButton = new QPushButton(tr("Clean all ready"), filePanel);
-    fileButtons->addWidget(removeButton);
+    removeButton_ = new QPushButton(filePanel);
+    cleanSelectedButton_ = new QPushButton(filePanel);
+    cleanAllButton_ = new QPushButton(filePanel);
+    fileButtons->addWidget(removeButton_);
     fileButtons->addStretch();
-    fileButtons->addWidget(cleanSelectedButton);
-    fileButtons->addWidget(cleanAllButton);
+    fileButtons->addWidget(cleanSelectedButton_);
+    fileButtons->addWidget(cleanAllButton_);
     fileLayout->addLayout(fileButtons);
 
     auto* metadataPanel = new QWidget(splitter);
@@ -361,21 +374,21 @@ void MainWindow::buildUi() {
     progress_->setTextVisible(false);
     progress_->hide();
     statusBar()->addPermanentWidget(progress_);
-    statusBar()->showMessage(tr("Ready"));
+    retranslateUi();
 
-    connect(addButton, &QPushButton::clicked, this, &MainWindow::browseFiles);
-    connect(settingsButton, &QPushButton::clicked, this, &MainWindow::showSettings);
-    connect(removeButton, &QPushButton::clicked, removeAction_, &QAction::trigger);
-    connect(cleanSelectedButton, &QPushButton::clicked, cleanSelectedAction_, &QAction::trigger);
-    connect(cleanAllButton, &QPushButton::clicked, cleanAllAction_, &QAction::trigger);
-    connect(removeAction_, &QAction::changed, removeButton,
-            [this, removeButton] { removeButton->setEnabled(removeAction_->isEnabled()); });
-    connect(cleanSelectedAction_, &QAction::changed, cleanSelectedButton,
-            [this, cleanSelectedButton] {
-                cleanSelectedButton->setEnabled(cleanSelectedAction_->isEnabled());
+    connect(addButton_, &QPushButton::clicked, this, &MainWindow::browseFiles);
+    connect(settingsButton_, &QPushButton::clicked, this, &MainWindow::showSettings);
+    connect(removeButton_, &QPushButton::clicked, removeAction_, &QAction::trigger);
+    connect(cleanSelectedButton_, &QPushButton::clicked, cleanSelectedAction_, &QAction::trigger);
+    connect(cleanAllButton_, &QPushButton::clicked, cleanAllAction_, &QAction::trigger);
+    connect(removeAction_, &QAction::changed, removeButton_,
+            [this] { removeButton_->setEnabled(removeAction_->isEnabled()); });
+    connect(cleanSelectedAction_, &QAction::changed, cleanSelectedButton_,
+            [this] {
+                cleanSelectedButton_->setEnabled(cleanSelectedAction_->isEnabled());
             });
-    connect(cleanAllAction_, &QAction::changed, cleanAllButton,
-            [this, cleanAllButton] { cleanAllButton->setEnabled(cleanAllAction_->isEnabled()); });
+    connect(cleanAllAction_, &QAction::changed, cleanAllButton_,
+            [this] { cleanAllButton_->setEnabled(cleanAllAction_->isEnabled()); });
     connect(dropArea_, &DropArea::filesDropped, this, &MainWindow::addFiles);
     connect(dropArea_, &DropArea::browseRequested, this, &MainWindow::browseFiles);
     connect(metadataSearch_, &QLineEdit::textChanged, metadataFilter_,
@@ -388,72 +401,72 @@ void MainWindow::buildUi() {
 }
 
 void MainWindow::buildActions() {
-    auto* addAction = new QAction(tr("Add files…"), this);
-    addAction->setShortcut(QKeySequence::Open);
-    connect(addAction, &QAction::triggered, this, &MainWindow::browseFiles);
+    addAction_ = new QAction(this);
+    addAction_->setShortcut(QKeySequence::Open);
+    connect(addAction_, &QAction::triggered, this, &MainWindow::browseFiles);
 
-    cleanSelectedAction_ = new QAction(tr("Clean selected"), this);
+    cleanSelectedAction_ = new QAction(this);
     cleanSelectedAction_->setShortcut(QKeySequence(QStringLiteral("Ctrl+Return")));
     connect(cleanSelectedAction_, &QAction::triggered, this, &MainWindow::cleanSelected);
 
-    cleanAllAction_ = new QAction(tr("Clean all ready files"), this);
+    cleanAllAction_ = new QAction(this);
     connect(cleanAllAction_, &QAction::triggered, this, &MainWindow::cleanAllReady);
 
-    removeAction_ = new QAction(tr("Remove from list"), this);
+    removeAction_ = new QAction(this);
     removeAction_->setShortcut(QKeySequence::Delete);
     connect(removeAction_, &QAction::triggered, this, &MainWindow::removeSelected);
 
-    openLocationAction_ = new QAction(tr("Open containing folder"), this);
+    openLocationAction_ = new QAction(this);
     connect(openLocationAction_, &QAction::triggered, this, &MainWindow::openCurrentLocation);
 
-    auto* settingsAction = new QAction(tr("Settings…"), this);
-    settingsAction->setShortcut(QKeySequence::Preferences);
-    connect(settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
+    settingsAction_ = new QAction(this);
+    settingsAction_->setShortcut(QKeySequence::Preferences);
+    connect(settingsAction_, &QAction::triggered, this, &MainWindow::showSettings);
 
-    auto* quitAction = new QAction(tr("Quit"), this);
-    quitAction->setShortcut(QKeySequence::Quit);
-    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+    quitAction_ = new QAction(this);
+    quitAction_->setShortcut(QKeySequence::Quit);
+    connect(quitAction_, &QAction::triggered, qApp, &QApplication::quit);
 
-    auto* aboutAction = new QAction(tr("About MetaDrop"), this);
-    connect(aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
+    aboutAction_ = new QAction(this);
+    connect(aboutAction_, &QAction::triggered, this, &MainWindow::showAbout);
 
-    auto* fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(addAction);
-    fileMenu->addSeparator();
-    fileMenu->addAction(cleanSelectedAction_);
-    fileMenu->addAction(cleanAllAction_);
-    fileMenu->addSeparator();
-    fileMenu->addAction(openLocationAction_);
-    fileMenu->addSeparator();
-    fileMenu->addAction(quitAction);
+    fileMenu_ = menuBar()->addMenu(QString());
+    fileMenu_->addAction(addAction_);
+    fileMenu_->addSeparator();
+    fileMenu_->addAction(cleanSelectedAction_);
+    fileMenu_->addAction(cleanAllAction_);
+    fileMenu_->addSeparator();
+    fileMenu_->addAction(openLocationAction_);
+    fileMenu_->addSeparator();
+    fileMenu_->addAction(quitAction_);
 
-    auto* editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->addAction(removeAction_);
-    editMenu->addSeparator();
-    editMenu->addAction(settingsAction);
+    editMenu_ = menuBar()->addMenu(QString());
+    editMenu_->addAction(removeAction_);
+    editMenu_->addSeparator();
+    editMenu_->addAction(settingsAction_);
 
-    auto* helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(aboutAction);
+    helpMenu_ = menuBar()->addMenu(QString());
+    helpMenu_->addAction(aboutAction_);
+    retranslateUi();
 }
 
 void MainWindow::buildTray() {
     tray_ = new QSystemTrayIcon(windowIcon(), this);
-    tray_->setToolTip(tr("MetaDrop — local metadata cleaner"));
     auto* menu = new QMenu(this);
-    auto* showAction = menu->addAction(tr("Open MetaDrop"));
-    auto* addAction = menu->addAction(tr("Add files…"));
-    auto* clipboardAction = menu->addAction(tr("Inspect files from clipboard"));
+    trayShowAction_ = menu->addAction(QString());
+    trayAddAction_ = menu->addAction(QString());
+    trayClipboardAction_ = menu->addAction(QString());
     menu->addSeparator();
-    auto* quitAction = menu->addAction(tr("Quit"));
+    trayQuitAction_ = menu->addAction(QString());
     tray_->setContextMenu(menu);
 
-    connect(showAction, &QAction::triggered, this, &MainWindow::showAndActivate);
-    connect(addAction, &QAction::triggered, this, [this] {
+    connect(trayShowAction_, &QAction::triggered, this, &MainWindow::showAndActivate);
+    connect(trayAddAction_, &QAction::triggered, this, [this] {
         showAndActivate();
         browseFiles();
     });
-    connect(clipboardAction, &QAction::triggered, this, &MainWindow::addClipboardFiles);
-    connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
+    connect(trayClipboardAction_, &QAction::triggered, this, &MainWindow::addClipboardFiles);
+    connect(trayQuitAction_, &QAction::triggered, qApp, &QApplication::quit);
     connect(tray_, &QSystemTrayIcon::activated, this,
             [this](const QSystemTrayIcon::ActivationReason reason) {
                 if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) {
@@ -462,6 +475,7 @@ void MainWindow::buildTray() {
             });
 
     setTrayEnabled(true);
+    retranslateUi();
 }
 
 void MainWindow::scanPath(const QString& path) {
@@ -541,8 +555,9 @@ void MainWindow::cleanPath(const QString& path) {
                            tr("Saved a verified copy of %1")
                                .arg(QFileInfo(report.sourcePath).fileName()));
                 } else {
-                    statusBar()->showMessage(tr("Cleaning failed: %1").arg(report.error), 10000);
-                    notify(tr("Cleaning failed"), report.error);
+                    const QString error = localizedMetadataText(report.error);
+                    statusBar()->showMessage(tr("Cleaning failed: %1").arg(error), 10000);
+                    notify(tr("Cleaning failed"), error);
                 }
                 showCurrentDetails();
                 refreshActions();
@@ -560,6 +575,53 @@ void MainWindow::updateBusyState(const int delta) {
         statusBar()->showMessage(tr("Processing %1 file(s)…").arg(activeJobs_));
     } else {
         statusBar()->showMessage(tr("Ready"), 3000);
+    }
+}
+
+void MainWindow::retranslateUi() {
+    setWindowTitle(tr("MetaDrop — Metadata Cleaner"));
+    if (subtitle_ != nullptr) {
+        subtitle_->setText(tr("Inspect first. Remove locally. Verify before saving."));
+    }
+    if (addButton_ != nullptr) {
+        addButton_->setText(tr("Add files…"));
+        settingsButton_->setText(tr("Settings"));
+        fileHeading_->setText(tr("Files"));
+        removeButton_->setText(tr("Remove"));
+        cleanSelectedButton_->setText(tr("Clean selected"));
+        cleanAllButton_->setText(tr("Clean all ready"));
+        metadataSearch_->setPlaceholderText(tr("Filter metadata…"));
+        metadataSearch_->setAccessibleName(tr("Metadata filter"));
+        safetyLabel_->setText(
+            tr("Source files are never overwritten. A cleaned copy is saved only after verification."));
+    }
+    if (addAction_ != nullptr) {
+        addAction_->setText(tr("Add files…"));
+        cleanSelectedAction_->setText(tr("Clean selected"));
+        cleanAllAction_->setText(tr("Clean all ready files"));
+        removeAction_->setText(tr("Remove from list"));
+        openLocationAction_->setText(tr("Open containing folder"));
+        settingsAction_->setText(tr("Settings…"));
+        quitAction_->setText(tr("Quit"));
+        aboutAction_->setText(tr("About MetaDrop"));
+        fileMenu_->setTitle(tr("&File"));
+        editMenu_->setTitle(tr("&Edit"));
+        helpMenu_->setTitle(tr("&Help"));
+    }
+    if (tray_ != nullptr) {
+        tray_->setToolTip(tr("MetaDrop — local metadata cleaner"));
+        trayShowAction_->setText(tr("Open MetaDrop"));
+        trayAddAction_->setText(tr("Add files…"));
+        trayClipboardAction_->setText(tr("Inspect files from clipboard"));
+        trayQuitAction_->setText(tr("Quit"));
+    }
+    if (files_ != nullptr) {
+        files_->retranslate();
+        metadata_->retranslate();
+        showCurrentDetails();
+    }
+    if (progress_ != nullptr) {
+        updateBusyState(0);
     }
 }
 

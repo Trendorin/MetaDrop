@@ -30,6 +30,7 @@ public:
 
     void setReport(const InspectionReport& report);
     void clear();
+    void retranslate();
 
 private:
     struct Node {
@@ -43,7 +44,10 @@ private:
     };
 
     [[nodiscard]] static int childRow(const Node* node);
+    void rebuild();
     std::unique_ptr<Node> root_;
+    InspectionReport report_;
+    bool hasReport_ = false;
 };
 
 } // namespace metadrop

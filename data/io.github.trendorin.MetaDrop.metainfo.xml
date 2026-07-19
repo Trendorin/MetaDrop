@@ -32,6 +32,11 @@
   <url type="vcs-browser">https://github.com/Trendorin/MetaDrop</url>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="0.1.6" date="2026-07-19">
+      <description>
+        <p>Add persistent, immediate interface switching between English, Russian, Ukrainian and German.</p>
+      </description>
+    </release>
     <release version="0.1.5" date="2026-07-19">
       <description>
         <p>Add a clean-built Arch Linux package and installation checks for every binary format.</p>

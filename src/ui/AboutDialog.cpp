@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDialogButtonBox>
 #include <QLabel>
+#include <QPushButton>
 #include <QStyle>
 #include <QVBoxLayout>
 
@@ -49,6 +50,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent) {
     layout->addWidget(details);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
+    buttons->button(QDialogButtonBox::Close)->setText(tr("Close"));
     connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
     layout->addWidget(buttons);

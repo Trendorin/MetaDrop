@@ -38,7 +38,7 @@ QVariant FileTableModel::data(const QModelIndex& index, const int role) const {
     }
     if (role == Qt::ToolTipRole) {
         if (!record.error.isEmpty()) {
-            return record.error;
+            return localizedMetadataText(record.error);
         }
         if (!record.outputPath.isEmpty()) {
             return tr("Verified copy: %1").arg(record.outputPath);
@@ -58,7 +58,8 @@ QVariant FileTableModel::data(const QModelIndex& index, const int role) const {
     case FileColumn:
         return QFileInfo(record.path).fileName();
     case FormatColumn:
-        return record.report.formatName.isEmpty() ? QStringLiteral("—") : record.report.formatName;
+        return record.report.formatName.isEmpty() ? QStringLiteral("—")
+                                                  : localizedMetadataText(record.report.formatName);
     case RiskColumn:
         return record.report.valid ? riskLevelName(record.report.highestRisk()) : QStringLiteral("—");
     case MetadataColumn:
@@ -168,6 +169,14 @@ void FileTableModel::clear() {
     beginResetModel();
     records_.clear();
     endResetModel();
+}
+
+void FileTableModel::retranslate() {
+    emit headerDataChanged(Qt::Horizontal, 0, ColumnCount - 1);
+    if (!records_.isEmpty()) {
+        emit dataChanged(index(0, 0), index(records_.size() - 1, ColumnCount - 1),
+                         {Qt::DisplayRole, Qt::ToolTipRole});
+    }
 }
 
 int FileTableModel::rowForPath(const QString& path) const {

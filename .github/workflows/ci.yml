@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
-            appstream build-essential cmake desktop-file-utils ninja-build \
+            appstream build-essential cmake desktop-file-utils libxml2-utils ninja-build \
             qt6-base-dev qt6-svg-dev qt6-tools-dev \
             libarchive-dev libexiv2-dev libqpdf-dev libtag1-dev
 
@@ -48,6 +48,7 @@ jobs:
         run: |
           desktop-file-validate data/io.github.trendorin.MetaDrop.desktop
           appstreamcli validate --no-net data/io.github.trendorin.MetaDrop.metainfo.xml
+          xmllint --noout translations/metadrop_ru.ts translations/metadrop_uk.ts translations/metadrop_de.ts
 
       - name: Build and install Ubuntu package
         run: |

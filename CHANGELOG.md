@@ -9,6 +9,18 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - Reproducible Flatpak packaging after the sandbox portal workflow is validated.
 - Additional fixture-driven format coverage without weakening verification.
 
+## [0.1.6] - 2026-07-19
+
+### Added
+
+- Add in-application language selection for English, Russian, Ukrainian and German, with a system-language default.
+- Translate interface controls, menus, tray actions, status labels, risk levels and common metadata diagnostics.
+
+### Changed
+
+- Apply language changes immediately after saving and persist the selection with the existing application settings.
+- Compile and validate all translation catalogs as part of the release build.
+
 ## [0.1.5] - 2026-07-19
 
 ### Added
@@ -82,7 +94,8 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - English and Russian interface resources.
 - CI, sanitizer tests, AppImage and Debian release automation.
 
-[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/Trendorin/MetaDrop/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/Trendorin/MetaDrop/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Trendorin/MetaDrop/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Trendorin/MetaDrop/compare/v0.1.2...v0.1.3

@@ -10,8 +10,10 @@
 #include <memory>
 
 class QAction;
+class QEvent;
 class QLabel;
 class QLineEdit;
+class QMenu;
 class QProgressBar;
 class QPushButton;
 class QSortFilterProxyModel;
@@ -40,6 +42,7 @@ public slots:
 
 protected:
     void closeEvent(QCloseEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
 private slots:
     void browseFiles();
@@ -56,6 +59,7 @@ private:
     void buildUi();
     void buildActions();
     void buildTray();
+    void retranslateUi();
     void scanPath(const QString& path);
     void cleanPath(const QString& path);
     void updateBusyState(int delta);
@@ -74,15 +78,33 @@ private:
     QTableView* fileTable_ = nullptr;
     QTreeView* metadataTree_ = nullptr;
     QLineEdit* metadataSearch_ = nullptr;
+    QLabel* subtitle_ = nullptr;
+    QLabel* fileHeading_ = nullptr;
     QLabel* detailsSummary_ = nullptr;
     QLabel* detailsWarning_ = nullptr;
     QLabel* safetyLabel_ = nullptr;
     QProgressBar* progress_ = nullptr;
+    QPushButton* addButton_ = nullptr;
+    QPushButton* settingsButton_ = nullptr;
+    QPushButton* removeButton_ = nullptr;
+    QPushButton* cleanSelectedButton_ = nullptr;
+    QPushButton* cleanAllButton_ = nullptr;
     QSystemTrayIcon* tray_ = nullptr;
+    QAction* addAction_ = nullptr;
     QAction* cleanSelectedAction_ = nullptr;
     QAction* cleanAllAction_ = nullptr;
     QAction* removeAction_ = nullptr;
     QAction* openLocationAction_ = nullptr;
+    QAction* settingsAction_ = nullptr;
+    QAction* quitAction_ = nullptr;
+    QAction* aboutAction_ = nullptr;
+    QAction* trayShowAction_ = nullptr;
+    QAction* trayAddAction_ = nullptr;
+    QAction* trayClipboardAction_ = nullptr;
+    QAction* trayQuitAction_ = nullptr;
+    QMenu* fileMenu_ = nullptr;
+    QMenu* editMenu_ = nullptr;
+    QMenu* helpMenu_ = nullptr;
     QSet<QString> activePaths_;
     int activeJobs_ = 0;
     bool trayEnabled_ = true;

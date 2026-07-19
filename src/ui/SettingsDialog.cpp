@@ -76,18 +76,23 @@ SettingsDialog::SettingsDialog(const SettingsSnapshot& settings, QWidget* parent
     language_->addItem(tr("System language"), QStringLiteral("system"));
     language_->addItem(QStringLiteral("English"), QStringLiteral("en"));
     language_->addItem(QStringLiteral("Русский"), QStringLiteral("ru"));
-    language_->setCurrentIndex(language_->findData(settings.language));
+    language_->addItem(QStringLiteral("Українська"), QStringLiteral("uk"));
+    language_->addItem(QStringLiteral("Deutsch"), QStringLiteral("de"));
+    const int languageIndex = language_->findData(settings.language);
+    language_->setCurrentIndex(languageIndex >= 0 ? languageIndex : 0);
     desktopForm->addRow(minimizeToTray_);
     desktopForm->addRow(showNotifications_);
     desktopForm->addRow(tr("Language:"), language_);
     root->addWidget(desktopGroup);
 
-    auto* languageHint = new QLabel(tr("Language changes take effect after restarting MetaDrop."), this);
+    auto* languageHint = new QLabel(tr("The interface language changes immediately after saving."), this);
     languageHint->setWordWrap(true);
     languageHint->setForegroundRole(QPalette::PlaceholderText);
     root->addWidget(languageHint);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Save, this);
+    buttons->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    buttons->button(QDialogButtonBox::Save)->setText(tr("Save"));
     root->addWidget(buttons);
 
     connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);

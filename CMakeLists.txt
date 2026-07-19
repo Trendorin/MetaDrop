@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
     MetaDrop
-    VERSION 0.1.5
+    VERSION 0.1.6
     DESCRIPTION "A native Linux metadata inspector and sanitizer"
     HOMEPAGE_URL "https://github.com/Trendorin/MetaDrop"
     LANGUAGES CXX
@@ -76,6 +76,8 @@ metadrop_set_project_warnings(metadrop_core)
 metadrop_enable_sanitizers(metadrop_core)
 
 qt_add_executable(metadrop
+    src/app/LanguageManager.cpp
+    src/app/LanguageManager.h
     src/app/main.cpp
     src/app/SingleInstance.cpp
     src/app/SingleInstance.h
@@ -110,7 +112,10 @@ metadrop_set_project_warnings(metadrop)
 metadrop_enable_sanitizers(metadrop)
 
 qt_add_translations(metadrop
-    TS_FILES translations/metadrop_ru.ts
+    TS_FILES
+        translations/metadrop_ru.ts
+        translations/metadrop_uk.ts
+        translations/metadrop_de.ts
     RESOURCE_PREFIX "/i18n"
 )
 

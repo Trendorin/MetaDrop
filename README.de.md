@@ -28,6 +28,8 @@
 
 MetaDrop ist eine native Linux-Anwendung, die sensible Dateimetadaten sichtbar macht und eine separat geprüfte, bereinigte Kopie erstellt. Sie verwendet C++20 und Qt 6 Widgets, übernimmt das aktive Systemdesign und verarbeitet Dateien lokal — ohne Telemetrie, Cloud-Dienst oder Netzwerk-Upload.
 
+Die Oberfläche folgt der Systemsprache oder wechselt in den Einstellungen sofort zwischen Englisch, Russisch, Ukrainisch und Deutsch.
+
 ## Funktionsweise
 
 | Schritt | Ergebnis |
