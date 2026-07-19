@@ -58,10 +58,10 @@ Download the matching asset and `SHA256SUMS` from the [latest release](https://g
 | System | Asset | Command |
 |---|---|---|
 | Fedora 44 | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
-| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
-| Arch family | `PKGBUILD` | `makepkg -si` |
+| Ubuntu 24.04 | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
+| Arch Linux | `metadrop-*-x86_64.pkg.tar.zst` | `sudo pacman -U ./metadrop-*-x86_64.pkg.tar.zst` |
 
-The RPM is built and dependency-tested on Fedora 44. It is not advertised as a RHEL package.
+Each binary package is built and install-tested in its native target: Ubuntu 24.04, Fedora 44 or current Arch Linux. `PKGBUILD` is included for a source rebuild with `makepkg -si`.
 
 Verify downloaded files before installation:
 
@@ -109,8 +109,8 @@ cmake --install build/release --prefix "$HOME/.local"
 | Installation | Command |
 |---|---|
 | Fedora 44 | `sudo dnf remove metadrop` |
-| Debian / Ubuntu | `sudo apt remove metadrop` |
-| Arch family | `sudo pacman -Rns metadrop` |
+| Ubuntu 24.04 | `sudo apt remove metadrop` |
+| Arch Linux | `sudo pacman -Rns metadrop` |
 | Source build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |
 
 Optional: remove local preferences with `rm -f "$HOME/.config/Trendorin/MetaDrop.conf"`. Cleaned output files are user documents and are never removed by uninstalling MetaDrop.

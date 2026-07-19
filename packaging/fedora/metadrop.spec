@@ -1,5 +1,5 @@
 Name:           metadrop
-Version:        0.1.4
+Version:        0.1.5
 Release:        1%{?dist}
 Summary:        Native Linux metadata inspector and sanitizer
 License:        GPL-3.0-or-later
@@ -57,6 +57,9 @@ follows the active Linux desktop theme.
 %{_datadir}/metainfo/io.github.trendorin.MetaDrop.metainfo.xml
 
 %changelog
+* Sun Jul 19 2026 Trendorin - 0.1.5-1
+- Add a native Arch Linux package and verify every binary package by installation
+
 * Sun Jul 19 2026 Trendorin - 0.1.4-1
 - Build and dependency-test the RPM natively on Fedora 44
 

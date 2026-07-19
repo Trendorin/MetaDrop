@@ -9,6 +9,19 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - Reproducible Flatpak packaging after the sandbox portal workflow is validated.
 - Additional fixture-driven format coverage without weakening verification.
 
+## [0.1.5] - 2026-07-19
+
+### Added
+
+- Publish a native `metadrop-0.1.5-1-x86_64.pkg.tar.zst` built with `makepkg --cleanbuild` on current Arch Linux.
+- Install-test the Arch package through `pacman -U` and verify its files and dynamic-library links.
+
+### Changed
+
+- Install-test the DEB on Ubuntu 24.04 and retain the Fedora 44 RPM installation gate.
+- Validate the TGZ layout, source archive, `PKGBUILD`, SPDX version and complete checksum manifest before publication.
+- Document binary packages only for the distributions on which they are built and tested.
+
 ## [0.1.4] - 2026-07-19
 
 ### Fixed
@@ -69,7 +82,8 @@ All notable changes are documented here. MetaDrop follows [Semantic Versioning](
 - English and Russian interface resources.
 - CI, sanitizer tests, AppImage and Debian release automation.
 
-[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/Trendorin/MetaDrop/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/Trendorin/MetaDrop/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/Trendorin/MetaDrop/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/Trendorin/MetaDrop/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Trendorin/MetaDrop/compare/v0.1.1...v0.1.2

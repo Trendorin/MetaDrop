@@ -56,10 +56,10 @@ Lade die passende Datei und `SHA256SUMS` aus dem [aktuellen Release](https://git
 | System | Datei | Befehl |
 |---|---|---|
 | Fedora 44 | `metadrop-*.rpm` | `sudo dnf install ./metadrop-*.rpm` |
-| Debian / Ubuntu | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
-| Arch-basiert | `PKGBUILD` | `makepkg -si` |
+| Ubuntu 24.04 | `metadrop_*.deb` | `sudo apt install ./metadrop_*.deb` |
+| Arch Linux | `metadrop-*-x86_64.pkg.tar.zst` | `sudo pacman -U ./metadrop-*-x86_64.pkg.tar.zst` |
 
-Das RPM wird unter Fedora 44 gebaut und per Installation geprüft. Es wird nicht als RHEL-Paket angeboten.
+Jedes Binärpaket wird im jeweiligen Zielsystem gebaut und installiert geprüft: Ubuntu 24.04, Fedora 44 oder aktuelles Arch Linux. Für einen Quellcode-Build bleibt `PKGBUILD` mit `makepkg -si` enthalten.
 
 ```bash
 sha256sum --ignore-missing --check SHA256SUMS
@@ -103,8 +103,8 @@ cmake --install build/release --prefix "$HOME/.local"
 | Installationsart | Befehl |
 |---|---|
 | Fedora 44 | `sudo dnf remove metadrop` |
-| Debian / Ubuntu | `sudo apt remove metadrop` |
-| Arch-basiert | `sudo pacman -Rns metadrop` |
+| Ubuntu 24.04 | `sudo apt remove metadrop` |
+| Arch Linux | `sudo pacman -Rns metadrop` |
 | Quellcode-Build | `xargs -r -d '\n' rm -- < build/release/install_manifest.txt` |
 
 Lokale Einstellungen lassen sich mit `rm -f "$HOME/.config/Trendorin/MetaDrop.conf"` entfernen. Bereinigte Ausgabedateien sind Benutzerdokumente und werden bei der Deinstallation nicht gelöscht.

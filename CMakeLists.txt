@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
     MetaDrop
-    VERSION 0.1.4
+    VERSION 0.1.5
     DESCRIPTION "A native Linux metadata inspector and sanitizer"
     HOMEPAGE_URL "https://github.com/Trendorin/MetaDrop"
     LANGUAGES CXX
