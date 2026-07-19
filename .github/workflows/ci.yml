@@ -35,6 +35,7 @@ jobs:
         run: >-
           cmake -S . -B build -G Ninja
           -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DCMAKE_INSTALL_PREFIX=/usr
           -DMETADROP_BUILD_TESTS=ON
 
       - name: Build
@@ -47,6 +48,25 @@ jobs:
         run: |
           desktop-file-validate data/io.github.trendorin.MetaDrop.desktop
           appstreamcli validate --no-net data/io.github.trendorin.MetaDrop.metainfo.xml
+
+      - name: Build and install Ubuntu package
+        run: |
+          mkdir -p package-output
+          cpack --config build/CPackConfig.cmake -G DEB -B package-output
+          cpack --config build/CPackConfig.cmake -G TGZ -B package-output
+          deb_file="$(find package-output -maxdepth 1 -type f -name '*.deb' -print -quit)"
+          tree_file="$(find package-output -maxdepth 1 -type f -name '*.tar.gz' -print -quit)"
+          test -n "${deb_file}"
+          test -n "${tree_file}"
+          dpkg-deb --info "${deb_file}"
+          dpkg-deb --contents "${deb_file}"
+          sudo apt-get install --no-install-recommends -y "${deb_file}"
+          dpkg-query --show --showformat='${Package} ${Version}\n' metadrop
+          dpkg --verify metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-deb-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-deb-ldd.txt
+          tar -tzf "${tree_file}" | tee /tmp/metadrop-tree.txt
+          grep -Eq '(^|/)bin/metadrop$' /tmp/metadrop-tree.txt
 
   fedora-rpm:
     name: Fedora 44 RPM install test
@@ -86,6 +106,58 @@ jobs:
           rpm -q metadrop
           ldd /usr/bin/metadrop | tee /tmp/metadrop-ldd.txt
           ! grep -q 'not found' /tmp/metadrop-ldd.txt
+
+  arch-package:
+    name: Arch Linux package install test
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    timeout-minutes: 35
+
+    steps:
+      - name: Install Arch build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            cmake git ninja qt6-base qt6-svg qt6-tools \
+            exiv2 taglib qpdf libarchive
+
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Create release source and PKGBUILD
+        shell: bash
+        run: |
+          version="$(awk '$1 == "VERSION" { print $2; exit }' CMakeLists.txt)"
+          test -n "${version}"
+          install -d -m 0755 /tmp/metadrop-package
+          git archive --format=tar.gz \
+            --prefix="MetaDrop-${version}/" \
+            --output="/tmp/metadrop-package/MetaDrop-${version}-source.tar.gz" HEAD
+          source_hash="$(sha256sum "/tmp/metadrop-package/MetaDrop-${version}-source.tar.gz" | cut -d' ' -f1)"
+          sed -e "s/@VERSION@/${version}/g" -e "s/@SOURCE_SHA256@/${source_hash}/g" \
+            packaging/arch/PKGBUILD.in > /tmp/metadrop-package/PKGBUILD
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+
+      - name: Build package as an unprivileged user
+        run: |
+          useradd --create-home builder
+          chown -R builder:builder /tmp/metadrop-package
+          runuser -u builder -- bash -lc \
+            'cd /tmp/metadrop-package && LC_ALL=C makepkg --cleanbuild --noconfirm'
+
+      - name: Verify and install Arch package
+        run: |
+          package_file="/tmp/metadrop-package/metadrop-${VERSION}-1-x86_64.pkg.tar.zst"
+          test -f "${package_file}"
+          pacman -Qip "${package_file}"
+          pacman -Qlp "${package_file}" | tee /tmp/metadrop-package-files.txt
+          grep -q 'usr/bin/metadrop$' /tmp/metadrop-package-files.txt
+          pacman -U --noconfirm "${package_file}"
+          pacman -Q metadrop
+          pacman -Qkk metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-arch-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-arch-ldd.txt
 
   sanitizers:
     name: ASan and UBSan

@@ -57,7 +57,7 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
   portable:
-    name: Build DEB and portable artifacts
+    name: Build and install DEB on Ubuntu 24.04
     needs: prepare
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -80,6 +80,7 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr \
             -DMETADROP_BUILD_TESTS=ON
           cmake --build build --parallel 2
           ctest --test-dir build --output-on-failure
@@ -91,7 +92,36 @@ jobs:
           cpack --config build/CPackConfig.cmake -G TGZ -B package-output
           cp package-output/*.deb package-output/*.tar.gz dist/
 
-      - name: Create source, Arch and SPDX artifacts
+      - name: Verify DEB dependencies and installation
+        run: |
+          deb_file="$(find dist -maxdepth 1 -type f -name '*.deb' -print -quit)"
+          test -n "${deb_file}"
+          dpkg-deb --info "${deb_file}"
+          dpkg-deb --contents "${deb_file}"
+          if dpkg-deb --field "${deb_file}" Depends | grep -Eq '(^|, )[[:alnum:].+-]+-dev([ ,]|$)'; then
+            echo "DEB unexpectedly depends on a development package" >&2
+            exit 1
+          fi
+          sudo apt-get install --no-install-recommends -y "${deb_file}"
+          dpkg-query --show --showformat='${Package} ${Version}\n' metadrop
+          dpkg --verify metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-deb-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-deb-ldd.txt
+
+      - name: Verify install tree
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          tree_file="dist/MetaDrop-${VERSION}-x86_64.tar.gz"
+          test -f "${tree_file}"
+          tar -tzf "${tree_file}" | tee /tmp/metadrop-tree.txt
+          grep -Eq '(^|/)bin/metadrop$' /tmp/metadrop-tree.txt
+          if grep -Eq '(^/|(^|/)\.\.(/|$))' /tmp/metadrop-tree.txt; then
+            echo "Install tree contains an unsafe path" >&2
+            exit 1
+          fi
+
+      - name: Create source, PKGBUILD and SPDX artifacts
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
         run: |
@@ -102,6 +132,7 @@ jobs:
           sed -e "s/@VERSION@/${VERSION}/g" -e "s/@SOURCE_SHA256@/${source_hash}/g" \
             packaging/arch/PKGBUILD.in > dist/PKGBUILD
           packaging/scripts/generate-sbom.sh "$VERSION" > "dist/MetaDrop-${VERSION}.spdx"
+          grep -Fq "sha256sums=('${source_hash}')" dist/PKGBUILD
 
       - name: Upload portable artifacts
         uses: actions/upload-artifact@v7
@@ -149,17 +180,19 @@ jobs:
         run: |
           rpm_file="$(find dist -maxdepth 1 -type f -name '*.rpm' -print -quit)"
           test -n "${rpm_file}"
-          rpm -qpR "${rpm_file}" | sort
-          if rpm -qpR "${rpm_file}" | grep -Eq 'libexiv2\.so\.27|libqpdf\.so\.29'; then
+          rpm -qpl "${rpm_file}"
+          rpm -qpR "${rpm_file}" | sort | tee /tmp/metadrop-rpm-requires.txt
+          if grep -Eq 'libexiv2\.so\.27|libqpdf\.so\.29' /tmp/metadrop-rpm-requires.txt; then
             echo "RPM contains dependencies from the Ubuntu build environment" >&2
             exit 1
           fi
-          rpm -qpR "${rpm_file}" | grep -q 'libexiv2\.so\.28'
-          rpm -qpR "${rpm_file}" | grep -q 'libqpdf\.so\.30'
+          grep -q 'libexiv2\.so\.28' /tmp/metadrop-rpm-requires.txt
+          grep -q 'libqpdf\.so\.30' /tmp/metadrop-rpm-requires.txt
           dnf install --setopt=install_weak_deps=False -y "${rpm_file}"
           rpm -q metadrop
-          ldd /usr/bin/metadrop | tee /tmp/metadrop-ldd.txt
-          ! grep -q 'not found' /tmp/metadrop-ldd.txt
+          rpm -V metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-rpm-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-rpm-ldd.txt
 
       - name: Upload Fedora RPM
         uses: actions/upload-artifact@v7
@@ -168,9 +201,65 @@ jobs:
           path: dist/*.rpm
           if-no-files-found: error
 
+  arch:
+    name: Build and install package on Arch Linux
+    needs: [prepare, portable]
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    timeout-minutes: 40
+
+    steps:
+      - name: Install Arch build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            cmake git ninja qt6-base qt6-svg qt6-tools \
+            exiv2 taglib qpdf libarchive
+
+      - name: Download source and PKGBUILD
+        uses: actions/download-artifact@v8
+        with:
+          name: MetaDrop-portable-${{ needs.prepare.outputs.version }}
+          path: dist-portable
+
+      - name: Build package as an unprivileged user
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          install -d -m 0755 /tmp/metadrop-package dist
+          cp dist-portable/PKGBUILD \
+            "dist-portable/MetaDrop-${VERSION}-source.tar.gz" \
+            /tmp/metadrop-package/
+          useradd --create-home builder
+          chown -R builder:builder /tmp/metadrop-package
+          runuser -u builder -- bash -lc \
+            'cd /tmp/metadrop-package && LC_ALL=C makepkg --cleanbuild --noconfirm'
+          cp "/tmp/metadrop-package/metadrop-${VERSION}-1-x86_64.pkg.tar.zst" dist/
+
+      - name: Verify and install Arch package
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          package_file="dist/metadrop-${VERSION}-1-x86_64.pkg.tar.zst"
+          test -f "${package_file}"
+          pacman -Qip "${package_file}"
+          pacman -Qlp "${package_file}" | tee /tmp/metadrop-arch-files.txt
+          grep -q 'usr/bin/metadrop$' /tmp/metadrop-arch-files.txt
+          pacman -U --noconfirm "${package_file}"
+          pacman -Q metadrop
+          pacman -Qkk metadrop
+          ldd /usr/bin/metadrop | tee /tmp/metadrop-arch-ldd.txt
+          ! grep -q 'not found' /tmp/metadrop-arch-ldd.txt
+
+      - name: Upload Arch package
+        uses: actions/upload-artifact@v7
+        with:
+          name: MetaDrop-arch-${{ needs.prepare.outputs.version }}
+          path: dist/*.pkg.tar.zst
+          if-no-files-found: error
+
   publish:
     name: Verify and publish release
-    needs: [prepare, portable, rpm]
+    needs: [prepare, portable, rpm, arch]
     runs-on: ubuntu-24.04
     timeout-minutes: 20
 
@@ -192,6 +281,12 @@ jobs:
           name: MetaDrop-rpm-${{ needs.prepare.outputs.version }}
           path: dist
 
+      - name: Download Arch package
+        uses: actions/download-artifact@v8
+        with:
+          name: MetaDrop-arch-${{ needs.prepare.outputs.version }}
+          path: dist
+
       - name: Verify artifact set and create checksums
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
@@ -200,21 +295,30 @@ jobs:
           shopt -s nullglob
           deb=(dist/metadrop_"${VERSION}"_*.deb)
           rpm=(dist/metadrop-"${VERSION}"-*.x86_64.rpm)
+          arch=(dist/metadrop-"${VERSION}"-1-x86_64.pkg.tar.zst)
           tree=(dist/MetaDrop-"${VERSION}"-x86_64.tar.gz)
           source=(dist/MetaDrop-"${VERSION}"-source.tar.gz)
           spdx=(dist/MetaDrop-"${VERSION}".spdx)
           pkgbuild=(dist/PKGBUILD)
           test "${#deb[@]}" -eq 1
           test "${#rpm[@]}" -eq 1
+          test "${#arch[@]}" -eq 1
           test "${#tree[@]}" -eq 1
           test "${#source[@]}" -eq 1
           test "${#spdx[@]}" -eq 1
           test "${#pkgbuild[@]}" -eq 1
-          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 6
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 7
           if find dist -maxdepth 1 -type f -iname '*AppImage*' | grep -q .; then
             echo "Unexpected AppImage artifact" >&2
             exit 1
           fi
+          if tar -tzf "${source[0]}" | grep -Eq '(^|/)(CODE_OF_CONDUCT[^/]*|\.env[^/]*|id_rsa|id_ed25519|[^/]*AppImage[^/]*)$'; then
+            echo "Source archive contains a forbidden file" >&2
+            exit 1
+          fi
+          source_hash="$(sha256sum "${source[0]}" | cut -d' ' -f1)"
+          grep -Fq "sha256sums=('${source_hash}')" "${pkgbuild[0]}"
+          grep -Fq "PackageVersion: ${VERSION}" "${spdx[0]}"
           cd dist
           find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' \
             | sort --zero-terminated \
