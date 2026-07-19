@@ -96,6 +96,7 @@ jobs:
         run: |
           deb_file="$(find dist -maxdepth 1 -type f -name '*.deb' -print -quit)"
           test -n "${deb_file}"
+          deb_file="$(realpath "${deb_file}")"
           dpkg-deb --info "${deb_file}"
           dpkg-deb --contents "${deb_file}"
           if dpkg-deb --field "${deb_file}" Depends | grep -Eq '(^|, )[[:alnum:].+-]+-dev([ ,]|$)'; then
